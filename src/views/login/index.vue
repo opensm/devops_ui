@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">登录页面</h3>
       </div>
 
       <el-form-item prop="username">
@@ -40,6 +40,11 @@
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
+      <el-form-item prop="ldap">
+        <template>
+          <el-checkbox ref="ldap" v-model="loginForm.ldap">LDAP</el-checkbox>
+        </template>
+      </el-form-item>
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
 
@@ -54,6 +59,7 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
+import Crypto from '@/utils/secret'
 
 export default {
   name: 'Login',
@@ -75,7 +81,8 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: 'KpcVJdbRkNWt',
+        ldap: 0
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -109,6 +116,7 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
+          this.loginForm.password = Crypto.set(this.loginForm.password, 'uW_Ab2r93qN3auGB')
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
