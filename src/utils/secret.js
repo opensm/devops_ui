@@ -17,5 +17,4 @@ export default {
     const decrypt = CryptoJS.AES.decrypt(word, key, { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 })
     return CryptoJS.enc.Utf8.stringify(decrypt).toString()
   }
-
 }

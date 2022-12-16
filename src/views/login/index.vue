@@ -118,7 +118,7 @@ export default {
           this.loading = true
           this.loginForm.password = Crypto.set(this.loginForm.password, 'uW_Ab2r93qN3auGB')
           this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: this.redirect || '/' })
+            this.$router.push({ path: this.redirect || '/dashboard' })
             this.loading = false
           }).catch(() => {
             this.loading = false
