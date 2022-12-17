@@ -15,6 +15,14 @@ export function getInfo() {
   })
 }
 
+export function getCurrentInfo() {
+  return request({
+    url: '/auth/user/current',
+    method: 'get'
+  })
+}
+
+
 export function logout() {
   return request({
     url: '/auth/user/logout',
