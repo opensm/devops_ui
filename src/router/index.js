@@ -56,29 +56,55 @@ export const constantRoutes = [
   },
 
   {
-    path: '/example',
+    path: '/auth',
     component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: '权限中心', icon: 'lock' },
+    redirect: '/auth/users',
+    name: 'auth',
+    meta: {
+      title: '权限中心',
+      icon: 'lock',
+      roles: ['admin', 'manager']
+    },
     children: [
       {
         path: 'table',
         name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: '用户', icon: 'user' }
+        component: () => import('@/views/auth/users'),
+        meta: {
+          title: '用户',
+          icon: 'user',
+          roles: ['admin', 'manager']
+        }
       },
       {
         path: 'tree',
         name: 'Tree',
         component: () => import('@/views/tree/index'),
-        meta: { title: '角色', icon: 'people' }
+        meta: {
+          title: '角色',
+          icon: 'people',
+          roles: ['admin', 'manager']
+        }
       },
       {
         path: 'permission',
         name: 'permission',
         component: () => import('@/views/tree/index'),
-        meta: { title: '权限', icon: 'tree' }
+        meta: {
+          title: '权限',
+          icon: 'tree',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'ldap',
+        name: 'ldap',
+        component: () => import('@/views/auth/ldap'),
+        meta: {
+          title: 'LDAP|AD',
+          icon: 'tree',
+          roles: ['admin', 'manager']
+        }
       }
     ]
   },
@@ -87,25 +113,42 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/kubernetes/kubernetes',
     name: 'Kubernetes',
-    meta: { title: 'Kubernetes', icon: 'el-icon-s-help' },
+    roles: ['admin', 'manager'],
+    meta: {
+      title: 'Kubernetes',
+      icon: 'el-icon-s-help',
+      roles: ['admin', 'manager']
+    },
     children: [
       {
         path: 'kubernetes',
         name: 'Kubernetes',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Kubernetes', icon: 'tree' }
+        component: () => import('@/views/kubernetes/auth'),
+        meta: {
+          title: 'Kubernetes',
+          icon: 'tree',
+          roles: ['admin', 'manager']
+        }
       },
       {
         path: 'namespace',
         name: 'Namespace',
-        component: () => import('@/views/table/index'),
-        meta: { title: '命名空间', icon: 'table' }
+        component: () => import('@/views/kubernetes/namespace'),
+        meta: {
+          title: '命名空间',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
       },
       {
         path: 'template',
         name: 'Template',
         component: () => import('@/views/table/index'),
-        meta: { title: '模板', icon: 'table' }
+        meta: {
+          title: '模板',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
       }
     ]
   },
@@ -129,7 +172,11 @@ export const constantRoutes = [
         path: 'index',
         name: 'db',
         component: () => import('@/views/form/index'),
-        meta: { title: '数据库', icon: 'form' }
+        meta: {
+          title: '数据库',
+          icon: 'form',
+          roles: ['admin', 'manager']
+        }
       }
     ]
   },

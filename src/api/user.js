@@ -22,7 +22,6 @@ export function getCurrentInfo() {
   })
 }
 
-
 export function logout() {
   return request({
     url: '/auth/user/logout',
