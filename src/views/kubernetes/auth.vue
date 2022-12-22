@@ -125,7 +125,7 @@
         label-width="70px"
         style="width: 400px; margin-left: 50px"
       >
-      <el-form-item label="name">
+        <el-form-item label="name">
           <el-input
             v-model="temp.name"
             placeholder="Please input"
