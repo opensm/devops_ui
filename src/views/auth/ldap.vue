@@ -10,6 +10,7 @@
       />
       <el-button
         v-waves
+        style="margin-left: 10px"
         class="filter-item"
         type="primary"
         icon="el-icon-search"
@@ -26,14 +27,6 @@
       >
         Add
       </el-button>
-      <el-checkbox
-        v-model="showReviewer"
-        class="filter-item"
-        style="margin-left: 15px"
-        @change="tableKey = tableKey + 1"
-      >
-        reviewer
-      </el-checkbox>
     </div>
 
     <el-table
@@ -202,9 +195,6 @@ import {
   deleteldap
 } from '@/api/ldap'
 import waves from '@/directive/waves' // waves directive
-// import { parseTime } from '@/utils'
-// import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-// arr to obj, such as { CN : "China", US : "USA" }
 export default {
   name: 'ComplexTable',
   directives: { waves },
@@ -245,19 +235,20 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        type: [
-          { required: true, message: 'type is required', trigger: 'change' }
+        ldap_server: [
+          { required: true, message: 'ldap_server is required', trigger: 'change' }
         ],
-        timestamp: [
-          {
-            type: 'date',
-            required: true,
-            message: 'timestamp is required',
-            trigger: 'change'
-          }
+        ldap_binddn: [
+          { required: true, message: 'ldap_binddn is required', trigger: 'blur' }
         ],
-        title: [
-          { required: true, message: 'title is required', trigger: 'blur' }
+        ldap_bindpass: [
+          { required: true, message: 'ldap_bindpass is required', trigger: 'blur' }
+        ],
+        ldap_login_attribute: [
+          { required: true, message: 'ldap_login_attribute is required', trigger: 'blur' }
+        ],
+        ldap_base_dn: [
+          { required: true, message: 'ldap_base_dn is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -325,8 +316,6 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          // this.temp.author = 'vue-element-admin'
           createldap(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false

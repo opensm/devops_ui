@@ -10,6 +10,7 @@
       />
       <el-button
         v-waves
+        style="margin-left: 10px"
         class="filter-item"
         type="primary"
         icon="el-icon-search"
@@ -26,14 +27,6 @@
       >
         Add
       </el-button>
-      <el-checkbox
-        v-model="showReviewer"
-        class="filter-item"
-        style="margin-left: 15px"
-        @change="tableKey = tableKey + 1"
-      >
-        reviewer
-      </el-checkbox>
     </div>
 
     <el-table

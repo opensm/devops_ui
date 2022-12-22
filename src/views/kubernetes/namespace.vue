@@ -10,6 +10,7 @@
       />
       <el-button
         v-waves
+        style="margin-left: 10px"
         class="filter-item"
         type="primary"
         icon="el-icon-search"
