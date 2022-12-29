@@ -85,7 +85,7 @@
             v-if="row.status != 'published'"
             size="mini"
             type="success"
-            @click="handleModifyStatus(row, 'published')"
+            @click="handleRsyncNamespace(row, 'published')"
           >
             Rsync
           </el-button>
@@ -196,6 +196,7 @@ import {
   updateKubernetes,
   deleteKubernetes
 } from '@/api/kubernetes'
+import { RsyncNamespace } from '@/api/namespace'
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -309,6 +310,17 @@ export default {
         type: 'success'
       })
       row.status = status
+    },
+    handleRsyncNamespace(row) {
+      RsyncNamespace(row.id).then(() => {
+        this.dialogFormVisible = false
+        this.$notify({
+          title: 'Success',
+          message: 'Delete Successfully',
+          type: 'success',
+          duration: 2000
+        })
+      })
     },
     sortChange(data) {
       const { prop, order } = data

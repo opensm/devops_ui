@@ -8,10 +8,9 @@ export function getNamespaceList(query) {
   })
 }
 
-export function RsyncNamespace(data) {
+export function RsyncNamespace(id) {
   return request({
-    url: '/order/kubernetes/namespace_rsync',
-    method: 'get',
-    data
+    url: `/order/kubernetes/namespace_rsync?id=${id}`,
+    method: 'get'
   })
 }
