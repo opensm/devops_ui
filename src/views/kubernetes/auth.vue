@@ -197,6 +197,7 @@ import {
   deleteKubernetes
 } from '@/api/kubernetes'
 import { RsyncNamespace } from '@/api/namespace'
+import Crypto from '@/utils/secret'
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -357,8 +358,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
+          this.temp.token = Crypto.set(this.temp.token, 'uW_Ab2r93qN3auGB')
           createKubernetes(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
@@ -386,6 +386,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           console.log(tempData)
+          tempData.token = Crypto.set(tempData.token, 'uW_Ab2r93qN3auGB')
           updateKubernetes(tempData).then(() => {
             const index = this.list.findIndex((v) => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
