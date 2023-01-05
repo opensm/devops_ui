@@ -111,11 +111,13 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.loginForm.password = Crypto.set(this.loginForm.password, process.env.SECRET)
+          const tmp_password = this.password
+          this.loginForm.password = Crypto.set(this.loginForm.password, process.env.VUE_APP_SECRET)
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/dashboard' })
             this.loading = false
           }).catch(() => {
+            this.loginForm.password = tmp_password
             this.loading = false
           })
         } else {
