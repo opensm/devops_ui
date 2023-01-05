@@ -387,6 +387,7 @@ export default {
           const tempData = Object.assign({}, this.temp)
           tempData.token = Crypto.set(tempData.token, process.env.SECRET)
           console.log(tempData)
+          console.log(process.env.SECRET)
           updateKubernetes(tempData).then(() => {
             const index = this.list.findIndex((v) => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
