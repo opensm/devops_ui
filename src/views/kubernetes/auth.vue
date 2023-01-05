@@ -358,7 +358,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.token = Crypto.set(this.temp.token, 'uW_Ab2r93qN3auGB')
+          this.temp.token = Crypto.set(this.temp.token, process.env.SECRET)
           createKubernetes(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
@@ -386,7 +386,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           console.log(tempData)
-          tempData.token = Crypto.set(tempData.token, 'uW_Ab2r93qN3auGB')
+          tempData.token = Crypto.set(tempData.token, process.env.SECRET)
           updateKubernetes(tempData).then(() => {
             const index = this.list.findIndex((v) => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
