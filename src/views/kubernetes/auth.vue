@@ -145,11 +145,25 @@
             placeholder="Please put the token"
           />
         </el-form-item>
+        <el-form-item label="ca" prop="ca">
+          <el-input
+            v-model="temp.ca"
+            class="filter-item"
+            placeholder="Please put the ca"
+          />
+        </el-form-item>
         <el-form-item label="regular" prop="regular">
           <el-input
             v-model="temp.regular"
             class="filter-item"
             placeholder="Please put the regular"
+          />
+        </el-form-item>
+        <el-form-item label="debug" prop="debug">
+          <el-input
+            v-model="temp.debug"
+            class="filter-item"
+            placeholder="Please put the debug"
           />
         </el-form-item>
         <el-form-item label="desc">
@@ -257,7 +271,9 @@ export default {
         address: '',
         token: '',
         regular: '',
-        desc: ''
+        desc: '',
+        debug: false,
+        ca: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
