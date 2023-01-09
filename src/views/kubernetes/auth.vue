@@ -402,7 +402,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteKubernetes(index).then(() => {
+      deleteKubernetes(row.id).then(() => {
         const index = this.list.findIndex((v) => v.id === this.temp.id)
         this.list.splice(index, 1, this.temp)
         this.dialogFormVisible = false
