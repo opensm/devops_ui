@@ -160,11 +160,9 @@
           />
         </el-form-item>
         <el-form-item label="debug" prop="debug">
-          <el-input
-            v-model="temp.debug"
-            class="filter-item"
-            placeholder="Please put the debug"
-          />
+          <el-tooltip :content="'debug status: ' + temp.debug" placement="debug">
+            <el-switch v-model="temp.debug" active-color="#13ce66" inactive-color="#ff4949" />
+          </el-tooltip>
         </el-form-item>
         <el-form-item label="desc">
           <el-input
