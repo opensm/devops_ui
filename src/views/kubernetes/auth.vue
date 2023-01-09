@@ -213,17 +213,6 @@ import Crypto from '@/utils/secret'
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
-// arr to obj, such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
 export default {
   name: 'ComplexTable',
   components: { Pagination },
@@ -236,9 +225,6 @@ export default {
         deleted: 'danger'
       }
       return statusMap[status]
-    },
-    typeFilter(type) {
-      return calendarTypeKeyValue[type]
     }
   },
   data() {
@@ -256,7 +242,6 @@ export default {
         sort: '+id'
       },
       importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
       sortOptions: [
         { label: 'ID Ascending', key: '+id' },
         { label: 'ID Descending', key: '-id' }
@@ -388,7 +373,8 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      this.temp.token = Crypto.get(this.temp.token, process.env.VUE_APP_SECRET)
+      this.temp.ca = Crypto.get(this.temp.ca, process.env.VUE_APP_SECRET)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -400,8 +386,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.token = Crypto.set(tempData.token, process.env.VUE_APP_SECRET)
-          console.log(tempData)
-          console.log(process.env.VUE_APP_SECRET)
+          tempData.ca = Crypto.set(tempData.ca, process.env.VUE_APP_SECRET)
           updateKubernetes(tempData).then(() => {
             const index = this.list.findIndex((v) => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
