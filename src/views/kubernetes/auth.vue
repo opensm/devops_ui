@@ -357,7 +357,30 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.token = Crypto.set(this.temp.token, process.env.VUE_APP_SECRET)
+          try {
+            this.temp.token = Crypto.set(this.temp.token, process.env.VUE_APP_SECRET)
+          } catch (error) {
+            console.log(error)
+            this.temp.token = ''
+            this.$notify({
+              title: 'Warning',
+              message: 'Current token is not currently valid',
+              type: 'warning',
+              duration: 2000
+            })
+          }
+          try {
+            this.temp.ca = Crypto.set(this.temp.ca, process.env.VUE_APP_SECRET)
+          } catch (error) {
+            console.log(error)
+            this.temp.ca = ''
+            this.$notify({
+              title: 'Warning',
+              message: 'Current ca is not currently valid',
+              type: 'warning',
+              duration: 2000
+            })
+          }
           createKubernetes(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
@@ -373,8 +396,32 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.token = Crypto.get(this.temp.token, process.env.VUE_APP_SECRET)
-      this.temp.ca = Crypto.get(this.temp.ca, process.env.VUE_APP_SECRET)
+      try {
+        this.temp.token = Crypto.get(this.temp.token, process.env.VUE_APP_SECRET)
+      } catch (error) {
+        console.log(error)
+        this.temp.token = ''
+        this.$notify({
+          title: 'Warning',
+          message: 'Current token is not currently valid',
+          type: 'warning',
+          duration: 2000
+        })
+      }
+      try {
+        this.temp.ca = Crypto.get(this.temp.ca, process.env.VUE_APP_SECRET)
+      } catch (error) {
+        console.log(error)
+        this.temp.ca = ''
+        this.$notify({
+          title: 'Warning',
+          message: 'Current ca is not currently valid',
+          type: 'warning',
+          duration: 2000
+        })
+      }
+      // this.temp.token = Crypto.get(this.temp.token, process.env.VUE_APP_SECRET)
+      // this.temp.ca = Crypto.get(this.temp.ca, process.env.VUE_APP_SECRET)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -387,6 +434,30 @@ export default {
           const tempData = Object.assign({}, this.temp)
           tempData.token = Crypto.set(tempData.token, process.env.VUE_APP_SECRET)
           tempData.ca = Crypto.set(tempData.ca, process.env.VUE_APP_SECRET)
+          try {
+            tempData.token = Crypto.set(tempData.token, process.env.VUE_APP_SECRET)
+          } catch (error) {
+            console.log(error)
+            tempData.token = ''
+            this.$notify({
+              title: 'Warning',
+              message: 'Current token is not currently valid',
+              type: 'warning',
+              duration: 2000
+            })
+          }
+          try {
+            tempData.ca = Crypto.set(tempData.ca, process.env.VUE_APP_SECRET)
+          } catch (error) {
+            console.log(error)
+            tempData.ca = ''
+            this.$notify({
+              title: 'Warning',
+              message: 'Current ca is not currently valid',
+              type: 'warning',
+              duration: 2000
+            })
+          }
           updateKubernetes(tempData).then(() => {
             const index = this.list.findIndex((v) => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
