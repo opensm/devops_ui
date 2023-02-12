@@ -49,7 +49,7 @@
       </el-table-column>
       <el-table-column label="kubernetes" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.kubernetes }}</span>
+          <span>{{ row.kubernetes_name }}</span>
         </template>
       </el-table-column>
       <el-table-column label="namespace" width="auto" align="center">
