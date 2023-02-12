@@ -90,13 +90,6 @@
             Rsync
           </el-button>
           <el-button
-            v-if="row.status != 'draft'"
-            size="mini"
-            @click="handleModifyStatus(row, 'draft')"
-          >
-            Draft
-          </el-button>
-          <el-button
             v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
