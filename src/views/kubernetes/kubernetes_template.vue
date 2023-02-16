@@ -3,7 +3,7 @@
     <div class="filter-container">
       <el-input
         v-model="listQuery.name"
-        placeholder="Title"
+        placeholder="class_name"
         style="width: 200px"
         class="filter-item"
         @keyup.enter.native="handleFilter"
@@ -51,24 +51,14 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Name" width="110px" align="center">
+      <el-table-column label="class_name" width="110px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.class_name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="address" width="auto" align="center">
+      <el-table-column label="class_type" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.address }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="regular" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.regular }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="desc" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.desc }}</span>
+          <span>{{ row.class_type }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -196,13 +186,11 @@
 </template>
 <script>
 import {
-  getKubernetesList,
-  createKubernetes,
-  updateKubernetes,
-  deleteKubernetes
-} from '@/api/kubernetes'
-import { RsyncNamespace } from '@/api/namespace'
-import Crypto from '@/utils/secret'
+  getTemplate,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate
+} from '@/api/kubernetes_template'
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -243,13 +231,10 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        name: '',
-        address: '',
-        token: '',
-        regular: '',
-        desc: '',
-        debug: false,
-        ca: ''
+        class_name: '',
+        class_type: '',
+        template: '',
+        desc: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -284,7 +269,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getKubernetesList(this.listQuery).then((response) => {
+      getTemplate(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -304,17 +289,6 @@ export default {
       })
       row.status = status
     },
-    handleRsyncNamespace(row) {
-      RsyncNamespace(row.id).then(() => {
-        this.dialogFormVisible = false
-        this.$notify({
-          title: 'Success',
-          message: 'Rsync Successfully',
-          type: 'success',
-          duration: 2000
-        })
-      })
-    },
     sortChange(data) {
       const { prop, order } = data
       if (prop === 'id') {
@@ -332,10 +306,9 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        name: '',
-        address: '',
-        token: '',
-        regular: '',
+        class_name: '',
+        class_type: '',
+        template: '',
         desc: ''
       }
     },
@@ -350,31 +323,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          try {
-            this.temp.token = Crypto.set(this.temp.token, process.env.VUE_APP_SECRET)
-          } catch (error) {
-            console.log(error)
-            this.temp.token = ''
-            this.$notify({
-              title: 'Warning',
-              message: 'Current token is not currently valid',
-              type: 'warning',
-              duration: 2000
-            })
-          }
-          try {
-            this.temp.ca = Crypto.set(this.temp.ca, process.env.VUE_APP_SECRET)
-          } catch (error) {
-            console.log(error)
-            this.temp.ca = ''
-            this.$notify({
-              title: 'Warning',
-              message: 'Current ca is not currently valid',
-              type: 'warning',
-              duration: 2000
-            })
-          }
-          createKubernetes(this.temp).then(() => {
+          createTemplate(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
@@ -425,33 +374,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.token = Crypto.set(tempData.token, process.env.VUE_APP_SECRET)
-          tempData.ca = Crypto.set(tempData.ca, process.env.VUE_APP_SECRET)
-          try {
-            tempData.token = Crypto.set(tempData.token, process.env.VUE_APP_SECRET)
-          } catch (error) {
-            console.log(error)
-            tempData.token = ''
-            this.$notify({
-              title: 'Warning',
-              message: 'Current token is not currently valid',
-              type: 'warning',
-              duration: 2000
-            })
-          }
-          try {
-            tempData.ca = Crypto.set(tempData.ca, process.env.VUE_APP_SECRET)
-          } catch (error) {
-            console.log(error)
-            tempData.ca = ''
-            this.$notify({
-              title: 'Warning',
-              message: 'Current ca is not currently valid',
-              type: 'warning',
-              duration: 2000
-            })
-          }
-          updateKubernetes(tempData).then(() => {
+          updateTemplate(tempData).then(() => {
             const index = this.list.findIndex((v) => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
@@ -466,7 +389,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteKubernetes(row.id).then(() => {
+      deleteTemplate(row.id).then(() => {
         const index = this.list.findIndex((v) => v.id === this.temp.id)
         this.list.splice(index, 1, this.temp)
         this.dialogFormVisible = false
