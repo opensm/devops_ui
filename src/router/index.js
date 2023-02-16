@@ -143,7 +143,7 @@ export const constantRoutes = [
       {
         path: 'template',
         name: 'Template',
-        component: () => import('@/views/table/index'),
+        component: () => import('@/views/kubernetes/kubernetes_template'),
         meta: {
           title: '模板',
           icon: 'table',
