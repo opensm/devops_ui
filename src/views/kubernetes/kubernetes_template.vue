@@ -108,44 +108,25 @@
         label-width="70px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="name">
+        <el-form-item label="class_name">
           <el-input
-            v-model="temp.name"
-            placeholder="Please input"
+            v-model="temp.class_name"
+            placeholder="Please input class_name"
           />
         </el-form-item>
-        <el-form-item label="address" prop="address">
+        <el-form-item label="class_type" prop="class_type">
           <el-input
             v-model="temp.address"
             class="filter-item"
             placeholder="Please put the address"
           />
         </el-form-item>
-        <el-form-item label="token" prop="token">
+        <el-form-item label="template" prop="template">
           <el-input
-            v-model="temp.token"
+            v-model="temp.template"
             class="filter-item"
-            placeholder="Please put the token"
+            placeholder="Please put the template"
           />
-        </el-form-item>
-        <el-form-item label="ca" prop="ca">
-          <el-input
-            v-model="temp.ca"
-            class="filter-item"
-            placeholder="Please put the ca"
-          />
-        </el-form-item>
-        <el-form-item label="regular" prop="regular">
-          <el-input
-            v-model="temp.regular"
-            class="filter-item"
-            placeholder="Please put the regular"
-          />
-        </el-form-item>
-        <el-form-item label="debug" prop="debug">
-          <el-tooltip :content="'debug status: ' + temp.debug" placement="debug">
-            <el-switch v-model="temp.debug" active-color="#13ce66" inactive-color="#ff4949" />
-          </el-tooltip>
         </el-form-item>
         <el-form-item label="desc">
           <el-input
