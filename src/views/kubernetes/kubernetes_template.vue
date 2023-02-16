@@ -167,7 +167,7 @@
 </template>
 <script>
 import {
-  getTemplate,
+  getTemplateList,
   createTemplate,
   updateTemplate,
   deleteTemplate
@@ -250,7 +250,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getTemplate(this.listQuery).then((response) => {
+      getTemplateList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
