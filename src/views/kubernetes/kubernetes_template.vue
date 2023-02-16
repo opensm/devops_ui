@@ -171,7 +171,7 @@ import {
   createTemplate,
   updateTemplate,
   deleteTemplate
-} from '@/api/kubernetes_template'
+} from '@/api/kubernetes template'
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
