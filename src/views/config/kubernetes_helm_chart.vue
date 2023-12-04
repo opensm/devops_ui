@@ -51,34 +51,24 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="helm模板" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
+          <span>{{ row.helm_repo_chart }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="helm仓库" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.helm_repo }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
+      <el-table-column label="helm版本" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
+          <span>{{ row.helm_repo_chart_version }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
+      <el-table-column label="workload类型" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.workload_type }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -90,14 +80,6 @@
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -127,52 +109,32 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="helm模板" prop="helm_repo_chart">
           <el-input
-            v-model="temp.username"
+            v-model="temp.helm_repo_chart"
             class="filter-item"
-            placeholder="用户名"
+            placeholder="helm模板"
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="helm仓库" prop="helm_repo">
           <el-input
-            v-model="temp.name"
+            v-model="temp.helm_repo"
             class="filter-item"
-            placeholder="姓名"
+            placeholder="helm仓库"
           />
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
+        <el-form-item label="helm版本" prop="helm_repo_chart_version">
           <el-input
-            v-model="temp.mobile"
+            v-model="temp.helm_repo_chart_version"
             class="filter-item"
-            placeholder="电话"
+            placeholder="helm版本"
           />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
+        <el-form-item label="workload类型" prop="workload_type">
           <el-input
-            v-model="temp.email"
+            v-model="temp.workload_type"
             class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
-          <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
+            placeholder="workload类型"
           />
         </el-form-item>
       </el-form>
@@ -206,11 +168,11 @@
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getKubernetesHelmChartList,
+  createKubernetesHelmChart,
+  updateKubernetesHelmChart,
+  deleteKubernetesHelmChart
+} from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -225,6 +187,7 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -240,12 +203,10 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        helm_repo: '',
+        helm_repo_chart: '',
+        helm_repo_chart_version: '',
+        workload_type: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +217,17 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
+        helm_repo: [
+          { required: true, message: 'helm_repo is required', trigger: 'blur' }
         ],
-        name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+        helm_repo_chart: [
+          { required: true, message: 'helm_repo_chart is required', trigger: 'blur' }
         ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
+        helm_repo_chart_version: [
+          { required: true, message: 'helm_repo_chart_version is required', trigger: 'blur' }
         ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
-        ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        workload_type: [
+          { required: true, message: 'workload_type is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -284,7 +239,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getKubernetesHelmChartList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,12 +276,10 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        helm_repo: '',
+        helm_repo_chart: '',
+        helm_repo_chart_version: '',
+        workload_type: ''
       }
     },
     handleCreate() {
@@ -340,7 +293,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createKubernetesHelmChart(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +320,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateKubernetesHelmChart(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -382,7 +335,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+      deleteKubernetesHelmChart(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({

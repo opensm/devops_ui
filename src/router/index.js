@@ -79,7 +79,7 @@ export const constantRoutes = [
       {
         path: 'tree',
         name: 'Tree',
-        component: () => import('@/views/tree/index'),
+        component: () => import('@/views/auth/roles'),
         meta: {
           title: '角色',
           icon: 'people',
@@ -89,7 +89,7 @@ export const constantRoutes = [
       {
         path: 'permission',
         name: 'permission',
-        component: () => import('@/views/tree/index'),
+        component: () => import('@/views/auth/permission'),
         meta: {
           title: '权限',
           icon: 'tree',
@@ -109,44 +109,196 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/kubernetes',
+    path: '/config',
     component: Layout,
-    redirect: '/kubernetes/kubernetes',
-    name: 'Kubernetes',
+    redirect: '/config/environment',
+    name: '配置中心',
     roles: ['admin', 'manager'],
     meta: {
-      title: 'Kubernetes',
+      title: '配置中心',
       icon: 'el-icon-s-help',
       roles: ['admin', 'manager']
     },
     children: [
       {
-        path: 'kubernetes',
-        name: 'Kubernetes',
-        component: () => import('@/views/kubernetes/auth'),
+        path: 'environment',
+        name: 'environment',
+        component: () => import('@/views/config/environment'),
         meta: {
-          title: 'Kubernetes',
+          title: '环境配置',
           icon: 'tree',
           roles: ['admin', 'manager']
         }
       },
       {
-        path: 'namespace',
-        name: 'Namespace',
-        component: () => import('@/views/kubernetes/namespace'),
+        path: 'kubernetes',
+        name: 'kubernetes',
+        component: () => import('@/views/config/kubernetes'),
         meta: {
-          title: '命名空间',
+          title: 'Kubernetes容器',
           icon: 'table',
           roles: ['admin', 'manager']
         }
       },
       {
-        path: 'template',
-        name: 'Template',
-        component: () => import('@/views/kubernetes/kubernetes_template'),
+        path: 'kubernets_edit/:id(\\d+)',
+        component: () => import('@/views/config/kubernets_edit'),
+        name: '编辑K8s配置',
+        meta: { title: '编辑K8s配置', noCache: true, activeMenu: '/config/kubernetes' },
+        hidden: true
+      },
+      {
+        path: 'kubernets_create',
+        component: () => import('@/views/config/kubernets_create'),
+        name: '新增K8s配置',
+        meta: { title: '新增K8s配置', noCache: true, activeMenu: '/config/kubernetes' },
+        hidden: true
+      },
+      {
+        path: 'sshkey',
+        name: 'sshkey',
+        component: () => import('@/views/config/sshkey'),
         meta: {
-          title: '模板',
+          title: 'SSH密钥',
           icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'service_config',
+        name: 'service_config',
+        component: () => import('@/views/config/service_config'),
+        meta: {
+          title: '服务配置文件',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'service_config_edit/:id(\\d+)',
+        component: () => import('@/views/config/service_config_edit'),
+        name: '编辑K8s配置',
+        meta: { title: '编辑K8s配置', noCache: true, activeMenu: '/config/service_config' },
+        hidden: true
+      },
+      {
+        path: 'service_config_create',
+        component: () => import('@/views/config/service_config_create'),
+        name: '新增K8s配置',
+        meta: { title: '新增K8s配置', noCache: true, activeMenu: '/config/service_config' },
+        hidden: true
+      },
+      {
+        path: 'service',
+        name: 'service',
+        component: () => import('@/views/config/service'),
+        meta: {
+          title: '服务列表',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'service_edit/:id(\\d+)',
+        component: () => import('@/views/config/service_edit'),
+        name: '编辑K8s配置',
+        meta: { title: '编辑K8s配置', noCache: true, activeMenu: '/config/service' },
+        hidden: true
+      },
+      {
+        path: 'service_create',
+        component: () => import('@/views/config/service_create'),
+        name: '新增K8s配置',
+        meta: { title: '新增K8s配置', noCache: true, activeMenu: '/config/service' },
+        hidden: true
+      },
+      {
+        path: 'service_resource',
+        name: 'service_resource',
+        component: () => import('@/views/config/service_resource'),
+        meta: {
+          title: '服务资源',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'kubernetes_environment_configuration',
+        name: 'kubernetes_environment_configuration',
+        component: () => import('@/views/config/kubernetes_environment_configuration'),
+        meta: {
+          title: '服务K8S环境配置',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'docker_environment_configuration',
+        name: 'docker_environment_configuration',
+        component: () => import('@/views/config/docker_environment_configuration'),
+        meta: {
+          title: '服务docker环境配置',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'service_environment',
+        name: 'service_environment',
+        component: () => import('@/views/config/service_environment'),
+        meta: {
+          title: '服务部署配置',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'kubernetes_helm_repo',
+        name: 'kubernetes_helm_repo',
+        component: () => import('@/views/config/kubernetes_helm_repo'),
+        meta: {
+          title: 'HELM仓库',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'kubernetes_helm_chart',
+        name: 'kubernetes_helm_chart',
+        component: () => import('@/views/config/kubernetes_helm_chart'),
+        meta: {
+          title: 'HELM 模板',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'product',
+        name: 'product',
+        component: () => import('@/views/config/product'),
+        meta: {
+          title: 'Docker制品',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'db',
+        name: 'db',
+        component: () => import('@/views/config/db'),
+        meta: {
+          title: '数据库配置',
+          icon: 'table',
+          roles: ['admin', 'manager']
+        }
+      },
+      {
+        path: 'project',
+        name: 'Project',
+        component: () => import('@/views/config/project'),
+        meta: {
+          title: '项目',
+          icon: 'wechat',
           roles: ['admin', 'manager']
         }
       }

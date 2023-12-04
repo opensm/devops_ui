@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border="true"
+      border
       fit
       highlight-current-row
       style="width: 100%"
@@ -51,34 +51,14 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="名称" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
+          <span>{{ row.environment }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="标识" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.code }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -90,14 +70,6 @@
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -127,52 +99,18 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="名称" prop="environment">
           <el-input
-            v-model="temp.username"
+            v-model="temp.environment"
             class="filter-item"
-            placeholder="用户名"
+            placeholder="名称"
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="环境代码" prop="code">
           <el-input
-            v-model="temp.name"
+            v-model="temp.code"
             class="filter-item"
-            placeholder="姓名"
-          />
-        </el-form-item>
-        <el-form-item label="电话" prop="mobile">
-          <el-input
-            v-model="temp.mobile"
-            class="filter-item"
-            placeholder="电话"
-          />
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input
-            v-model="temp.email"
-            class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
-          <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
+            placeholder="环境代码"
           />
         </el-form-item>
       </el-form>
@@ -206,11 +144,11 @@
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getEnvironmentList,
+  createEnvironment,
+  updateEnvironment,
+  deleteEnvironment
+} from '@/api/environment'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -220,6 +158,13 @@ export default {
   },
   directives: { waves },
   data() {
+    // const validateEnvCode = (rule, value, callback) => {
+    //   if (value.length < 6) {
+    //     callback(new Error('The password can not be less than 6 digits'))
+    //   } else {
+    //     callback()
+    //   }
+    // }
     return {
       tableKey: 0,
       list: null,
@@ -240,12 +185,8 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        environment: '',
+        code: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +197,15 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
+        environment: [
+          { required: true, message: 'environment is required', trigger: 'blur' }
         ],
-        name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
-        ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
-        ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
-        ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        code: [
+          { required: true, message: 'code is required', trigger: 'blur' },
+          { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
+          { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号', trigger: 'blur' },
+          { pattern: /[0-9a-zA-Z]{1,10}/, message: '只可以输入数字和字母', trigger: 'blur' },
+          { min: 1, max: 10, message: '长度在 1 到 6个字符', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -284,7 +217,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getEnvironmentList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,12 +254,8 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        environment: '',
+        code: ''
       }
     },
     handleCreate() {
@@ -340,7 +269,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createEnvironment(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +296,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateEnvironment(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -382,7 +311,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+      deleteEnvironment(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({

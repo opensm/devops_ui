@@ -51,34 +51,34 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="数据库类型" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.db_type }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="链接地址" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.address }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="用户" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.username }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="密码" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.password }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
+      <el-table-column label="uri连接地址" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
+          <span>{{ row.uri }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
+      <el-table-column label="备注" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.desc }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -92,15 +92,7 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
-          </el-button>
-          <el-button
-            v-if="row.status != 'deleted'"
+            v-if="row.username != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -127,52 +119,46 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="数据库类型" prop="name">
+          <el-input
+            v-model="temp.db_type"
+            class="filter-item"
+            placeholder="数据库类型"
+          />
+        </el-form-item>
+        <el-form-item label="链接地址" prop="address">
+          <el-input
+            v-model="temp.address"
+            class="filter-item"
+            placeholder="链接地址"
+          />
+        </el-form-item>
+        <el-form-item label="用户" prop="username">
           <el-input
             v-model="temp.username"
             class="filter-item"
-            placeholder="用户名"
+            placeholder="用户"
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="密码" prop="password">
           <el-input
-            v-model="temp.name"
+            v-model="temp.password"
             class="filter-item"
-            placeholder="姓名"
+            placeholder="密码"
           />
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
+        <el-form-item label="uri连接地址" prop="uri">
           <el-input
-            v-model="temp.mobile"
+            v-model="temp.uri"
             class="filter-item"
-            placeholder="电话"
+            placeholder="uri连接地址"
           />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
+        <el-form-item label="备注" prop="desc">
           <el-input
-            v-model="temp.email"
+            v-model="temp.desc"
             class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
-          <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
+            placeholder="备注"
           />
         </el-form-item>
       </el-form>
@@ -206,11 +192,11 @@
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getDBList,
+  createDB,
+  updateDB,
+  deleteDB
+} from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -240,12 +226,12 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
         name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        address: '',
+        password: '',
+        username: '',
+        uri: '',
+        desc: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +242,23 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
-        ],
         name: [
           { required: true, message: 'name is required', trigger: 'blur' }
         ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
+        address: [
+          { required: true, message: 'address is required', trigger: 'blur' }
         ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
+        username: [
+          { required: true, message: 'username is required', trigger: 'blur' }
         ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
+        password: [
+          { required: true, message: 'password is required', trigger: 'blur' }
         ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        uri: [
+          { required: true, message: 'uri is required', trigger: 'blur' }
+        ],
+        desc: [
+          { required: true, message: 'desc is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -284,7 +270,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getDBList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -297,12 +283,12 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
-    handleModifyStatus(row, status) {
+    handleModifyusername(row, username) {
       this.$message({
         message: '操作Success',
         type: 'success'
       })
-      row.status = status
+      row.username = username
     },
     sortChange(data) {
       const { prop, order } = data
@@ -321,12 +307,8 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
         name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        address: ''
       }
     },
     handleCreate() {
@@ -340,7 +322,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createDB(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +349,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateDB(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -382,7 +364,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+      deleteDB(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({

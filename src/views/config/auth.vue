@@ -200,8 +200,8 @@ import {
   createKubernetes,
   updateKubernetes,
   deleteKubernetes
-} from '@/api/kubernetes'
-import { RsyncNamespace } from '@/api/namespace'
+} from '@/api/kubernetes_auth'
+import { RsyncNamespace } from '@/api/kubernetes_namespace'
 import Crypto from '@/utils/secret'
 import waves from '@/directive/waves' // waves directive
 // import { parseTime } from '@/utils'

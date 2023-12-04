@@ -51,34 +51,14 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="helm repo配置命令" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
+          <span>{{ row.helm_repo_add_command }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="是否可用" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.enable }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -90,14 +70,6 @@
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -127,52 +99,18 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="helm repo配置命令" prop="helm_repo_add_command">
           <el-input
-            v-model="temp.username"
+            v-model="temp.helm_repo_add_command"
             class="filter-item"
-            placeholder="用户名"
+            placeholder="helm repo配置命令"
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="是否可用" prop="enable">
           <el-input
-            v-model="temp.name"
+            v-model="temp.enable"
             class="filter-item"
-            placeholder="姓名"
-          />
-        </el-form-item>
-        <el-form-item label="电话" prop="mobile">
-          <el-input
-            v-model="temp.mobile"
-            class="filter-item"
-            placeholder="电话"
-          />
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input
-            v-model="temp.email"
-            class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
-          <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
+            placeholder="是否可用"
           />
         </el-form-item>
       </el-form>
@@ -206,11 +144,11 @@
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getKubernetesHelmRepoList,
+  createKubernetesHelmRepo,
+  updateKubernetesHelmRepo,
+  deleteKubernetesHelmRepo
+} from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -225,6 +163,7 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -240,12 +179,8 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        enable: '',
+        helm_repo_add_command: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +191,11 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
+        enable: [
+          { required: true, message: 'enable is required', trigger: 'blur' }
         ],
-        name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
-        ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
-        ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
-        ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        helm_repo_add_command: [
+          { required: true, message: 'helm_repo_add_command is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -284,7 +207,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getKubernetesHelmRepoList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,12 +244,8 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
         name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        helm_repo_add_command: ''
       }
     },
     handleCreate() {
@@ -340,7 +259,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createKubernetesHelmRepo(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +286,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateKubernetesHelmRepo(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -382,7 +301,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+      deleteKubernetesHelmRepo(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({

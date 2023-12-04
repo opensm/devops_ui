@@ -51,34 +51,24 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="名称" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
+      <el-table-column label="权限" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
+          <span>{{ row.permission }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
+      <el-table-column label="是否是系统管理员" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
+          <span>{{ row.manager }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
+      <el-table-column label="描述" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.desc }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -127,47 +117,32 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
-          <el-input
-            v-model="temp.username"
-            class="filter-item"
-            placeholder="用户名"
-          />
-        </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="名称" prop="name">
           <el-input
             v-model="temp.name"
             class="filter-item"
-            placeholder="姓名"
+            placeholder="名称"
           />
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
-          <el-input
-            v-model="temp.mobile"
+        <el-form-item label="关联权限" prop="permission">
+          <el-select
+            v-model="temp.permission"
             class="filter-item"
-            placeholder="电话"
-          />
+            placeholder="关联权限"
+            size="medium"
+            multiple
+          >
+            <el-option
+              v-for="item in selectList"
+              :key="item.id"
+              :label="item.project"
+              :value="item.id"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input
-            v-model="temp.email"
-            class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
+        <el-form-item label="系统管理员" prop="manager">
           <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
+            v-model="temp.manager"
             style="display: block"
             active-color="#13ce66"
             inactive-color="#ff4949"
@@ -206,11 +181,12 @@
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getRoleList,
+  createRole,
+  updateRole,
+  deleteRole
+} from '@/api/role'
+import { getPermissionList } from '@/api/permission'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -225,6 +201,7 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -240,12 +217,9 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
         name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        permission: '',
+        manager: 'false'
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +230,14 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
-        ],
         name: [
           { required: true, message: 'name is required', trigger: 'blur' }
         ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
+        permission: [
+          { required: true, message: 'permission is required', trigger: 'blur' }
         ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
-        ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        manager: [
+          { required: true, message: 'manager is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -280,11 +245,18 @@ export default {
   },
   created() {
     this.getList()
+    this.getPermission()
   },
   methods: {
+    getPermission() {
+      getPermissionList().then(response => {
+        const { data } = response
+        this.selectList = data
+      })
+    },
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getRoleList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,12 +293,9 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
         name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        permission: '',
+        manager: 'false'
       }
     },
     handleCreate() {
@@ -340,7 +309,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createRole(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +336,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateRole(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -382,7 +351,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+      deleteRole(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({

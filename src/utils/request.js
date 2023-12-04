@@ -43,31 +43,51 @@ service.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   response => {
+    const { status } = response
     const res = response.data
-
+    const { message, code } = res
+    console.log(status)
     // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000) {
-      Message({
-        message: res.message || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
-
+    if (code !== 20000) {
+      if (code === 40004) {
+        Message({
+          message: res.message || 'Error',
+          type: 'error',
+          duration: 5 * 1000
+        })
+      }
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
+      if (code === 40001 || code === 40003 || code === 50000) {
         // to re-login
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
+        MessageBox.confirm('错误提示：' + message, {
+          confirmButtonText: '重新登录',
+          cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           store.dispatch('user/resetToken').then(() => {
             location.reload()
           })
         })
+      } else if (code === 50003) {
+        // to re-login
+        MessageBox.confirm('错误提示：' + message, {
+          confirmButtonText: '重新登录',
+          cancelButtonText: '取消',
+          type: 'error'
+        }).then(() => {
+          store.dispatch('user/resetToken').then(() => {
+            location.reload()
+          })
+        })
       }
-      return Promise.reject(new Error(res.message || 'Error'))
+      return Promise.reject(new Error('登录失败，请检查！' || 'Error'))
     } else {
+      Message({
+        message: message || '操作成功！',
+        type: 'success',
+        duration: 5 * 1000
+      })
+      // console.log(res)
       return res
     }
   },

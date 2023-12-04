@@ -51,34 +51,19 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="项目" width="110px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
+          <span>{{ row.project }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="操作权限" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.rw_permissions }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
+      <el-table-column label="审批权限" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.app_permissions }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -90,14 +75,6 @@
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -127,47 +104,37 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
-          <el-input
-            v-model="temp.username"
+        <el-form-item label="项目" prop="project">
+          <el-select
+            v-model="temp.project"
             class="filter-item"
-            placeholder="用户名"
-          />
+            placeholder="项目"
+          >
+            <el-option
+              v-for="item in selectList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input
-            v-model="temp.name"
+        <el-form-item label="权限" prop="rw_permissions">
+          <el-select
+            v-model="temp.rw_permissions"
             class="filter-item"
-            placeholder="姓名"
-          />
+            placeholder="权限"
+          >
+            <el-option
+              v-for="value in selectList2"
+              :key="value.value"
+              :label="value.label"
+              :value="value.value"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
-          <el-input
-            v-model="temp.mobile"
-            class="filter-item"
-            placeholder="电话"
-          />
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input
-            v-model="temp.email"
-            class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
+        <el-form-item label="审核权限" prop="app_permissions">
           <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
+            v-model="temp.app_permissions"
             style="display: block"
             active-color="#13ce66"
             inactive-color="#ff4949"
@@ -206,11 +173,12 @@
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getPermissionList,
+  createPermission,
+  updatePermission,
+  deletePermission
+} from '@/api/permission'
+import { getProjectList } from '@/api/project'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -225,6 +193,14 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      selectList: [],
+      selectList2: [{
+        label: '读(r)',
+        value: 'read'
+      }, {
+        label: '读写(rw)',
+        value: 'readwrite'
+      }],
       listQuery: {
         page: 1,
         limit: 20,
@@ -240,12 +216,9 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        project: '',
+        rw_permissions: '',
+        app_permissions: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +229,14 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
+        project: [
+          { required: true, message: 'project is required', trigger: 'change' }
         ],
-        name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+        rw_permissions: [
+          { required: true, message: 'rw_permissions is required', trigger: 'blur' }
         ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
-        ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
-        ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        app_permissions: [
+          { required: true, message: 'app_permissions is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -280,11 +244,18 @@ export default {
   },
   created() {
     this.getList()
+    this.getSelection()
   },
   methods: {
+    getSelection() {
+      getProjectList().then(response => {
+        const { data } = response
+        this.selectList = data
+      })
+    },
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getPermissionList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,12 +292,9 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        project: '',
+        rw_permissions: '',
+        app_permissions: ''
       }
     },
     handleCreate() {
@@ -340,7 +308,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createPermission(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +335,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updatePermission(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -382,7 +350,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+      deletePermission(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({

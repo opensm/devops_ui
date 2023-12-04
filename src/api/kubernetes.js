@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getKubernetesList(query) {
   return request({
-    url: '/order/kubernetes/auth',
+    url: '/config/kubernetes',
     method: 'get',
     params: query
   })
@@ -10,22 +10,29 @@ export function getKubernetesList(query) {
 
 export function createKubernetes(data) {
   return request({
-    url: '/order/kubernetes/auth',
+    url: '/config/kubernetes',
     method: 'post',
     data
   })
 }
-export function deleteKubernetes(data) {
+export function deleteKubernetes(id) {
   return request({
-    url: `/order/kubernetes/auth?id=${data}`,
+    url: `/config/kubernetes_info/${id}`,
     method: 'delete'
   })
 }
 
-export function updateKubernetes(data) {
+export function updateKubernetes(id, data) {
   return request({
-    url: `/order/kubernetes/auth`,
+    url: `/config/kubernetes_info/${id}`,
     method: 'put',
     data
+  })
+}
+
+export function getKubernetes(id) {
+  return request({
+    url: `/config/kubernetes_info/${id}`,
+    method: 'get'
   })
 }

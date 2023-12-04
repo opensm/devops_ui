@@ -3,7 +3,7 @@
     <div class="filter-container">
       <el-input
         v-model="listQuery.name"
-        placeholder="class_name"
+        placeholder="Title"
         style="width: 200px"
         class="filter-item"
         @keyup.enter.native="handleFilter"
@@ -16,7 +16,7 @@
         icon="el-icon-search"
         @click="handleFilter"
       >
-        Search
+        搜索
       </el-button>
       <el-button
         class="filter-item"
@@ -25,7 +25,7 @@
         icon="el-icon-edit"
         @click="handleCreate"
       >
-        Add
+        新增
       </el-button>
     </div>
 
@@ -51,33 +51,35 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="class_name" width="110px" align="center">
+      <el-table-column label="Harbor配置" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.class_name }}</span>
+          <span>{{ row.kubernetes_pull_secret }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="class_type" width="auto" align="center">
+      <el-table-column label="副本数" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.class_type }}</span>
+          <span>{{ row.kubernetes_replica_count }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="关联k8s认证信息" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.kubernetes_auth }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="k8s命名空间" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.kubernetes_namespace }}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
-        width="auto"
+        width="400px"
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            Edit
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleRsyncNamespace(row, 'published')"
-          >
-            Rsync
+            编辑
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -85,14 +87,13 @@
             type="danger"
             @click="handleDelete(row, $index)"
           >
-            Delete
+            删除
           </el-button>
         </template>
       </el-table-column>
     </el-table>
-
     <pagination
-      v-show="total > 0"
+      v-show="total>0"
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.limit"
@@ -105,96 +106,73 @@
         :rules="rules"
         :model="temp"
         label-position="left"
-        label-width="70px"
+        label-width="180px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="class_name">
+        <el-form-item label="Harbor配置" prop="kubernetes_pull_secret">
           <el-input
-            v-model="temp.class_name"
-            placeholder="Please input class_name"
-          />
-        </el-form-item>
-        <el-form-item label="class_type" prop="class_type">
-          <el-input
-            v-model="temp.address"
+            v-model="temp.kubernetes_pull_secret"
             class="filter-item"
-            placeholder="Please put the address"
+            placeholder="Harbor配置"
           />
         </el-form-item>
-        <el-form-item label="template" prop="template">
-          <el-input
-            v-model="temp.template"
+        <el-form-item label="副本数" prop="kubernetes_replica_count">
+          <el-input-number
+            v-model="temp.kubernetes_replica_count"
             class="filter-item"
-            placeholder="Please put the template"
+            placeholder="副本数"
+            :min="1"
           />
         </el-form-item>
-        <el-form-item label="desc">
+        <el-form-item label="Kubernetes信息" prop="kubernetes_auth">
+          <el-select v-for="(k8s,index) in selectList" :key="k8s.id" v-model="temp.kubernetes_auth">
+            <el-option :value="k8s.id" :label="k8s.name">{{ k8s.name }}</el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Kubernetes命名空间" prop="kubernetes_namespace">
           <el-input
-            v-model="temp.desc"
-            :autosize="{ minRows: 2, maxRows: 4 }"
-            type="textarea"
-            placeholder="Please input desc"
+            v-model="temp.kubernetes_namespace"
+            class="filter-item"
+            placeholder="Kubernetes命名空间"
           />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false"> Cancel </el-button>
+        <el-button @click="dialogFormVisible = false"> 取消 </el-button>
         <el-button
           type="primary"
           @click="dialogStatus === 'create' ? createData() : updateData()"
         >
-          Confirm
+          确认
         </el-button>
       </div>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
-      </span>
     </el-dialog>
   </div>
 </template>
 <script>
 import {
-  getTemplateList,
-  createTemplate,
-  updateTemplate,
-  deleteTemplate
-} from '@/api/kubernetes template'
+  getKubernetesEnvironmentConfigurationList,
+  createKubernetesEnvironmentConfiguration,
+  updateKubernetesEnvironmentConfiguration,
+  deleteKubernetesEnvironmentConfiguration
+} from '@/api/config'
+import { getKubernetesList } from '@/api/kubernetes'
+import { getDockerEnvironmentConfigurationList } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
-// import { parseTime } from '@/utils'
-import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import Pagination from '@/components/Pagination'
 export default {
   name: 'ComplexTable',
-  components: { Pagination },
-  directives: { waves },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'info',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    }
+  components: {
+    Pagination
   },
+  directives: { waves },
   data() {
     return {
       tableKey: 0,
       list: null,
       total: 0,
       listLoading: true,
+      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -203,42 +181,36 @@ export default {
         type: undefined,
         sort: '+id'
       },
-      importanceOptions: [1, 2, 3],
       sortOptions: [
         { label: 'ID Ascending', key: '+id' },
         { label: 'ID Descending', key: '-id' }
       ],
-      statusOptions: ['published', 'draft', 'deleted'],
-      showReviewer: false,
       temp: {
         id: undefined,
-        class_name: '',
-        class_type: '',
-        template: '',
-        desc: ''
+        kubernetes_pull_secret: '',
+        kubernetes_environment_from_Sec: '',
+        kubernetes_replica_count: 0,
+        kubernetes_auth: '',
+        kubernetes_namespace: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '修改',
+        create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
-        type: [
-          { required: true, message: 'type is required', trigger: 'change' }
+        kubernetes_pull_secret: [
+          { required: true, message: 'harbor关联secret必须填写', trigger: 'blur' }
         ],
-        timestamp: [
-          {
-            type: 'date',
-            required: true,
-            message: 'timestamp is required',
-            trigger: 'change'
-          }
+        kubernetes_auth: [
+          { required: true, message: 'Kubernetes关联集群必须填写', trigger: 'blur' }
         ],
-        title: [
-          { required: true, message: 'title is required', trigger: 'blur' }
+        kubernetes_namespace: [
+          { required: true, message: '命名空间 必须填写', trigger: 'blur' }
+        ],
+        kubernetes_replica_count: [
+          { required: true, message: '副本个数 必须填写', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -246,11 +218,17 @@ export default {
   },
   created() {
     this.getList()
+    this.getKubernetes()
   },
   methods: {
+    getKubernetes(){
+      getKubernetesList().then(( response ) => {
+        this.selectList = response.data
+      })
+    },
     getList() {
       this.listLoading = true
-      getTemplateList(this.listQuery).then((response) => {
+      getKubernetesEnvironmentConfigurationList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -287,10 +265,11 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        class_name: '',
-        class_type: '',
-        template: '',
-        desc: ''
+        kubernetes_pull_secret: '',
+        kubernetes_environment_from_Sec: '',
+        kubernetes_replica_count: 0,
+        kubernetes_auth: '',
+        kubernetes_namespace: ''
       }
     },
     handleCreate() {
@@ -304,47 +283,23 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createTemplate(this.temp).then(() => {
-            this.list.unshift(this.temp)
+          createKubernetesEnvironmentConfiguration(this.temp).then(response => {
             this.dialogFormVisible = false
+            const { message, code } = response
             this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
+              title: '成功',
+              message: `创建成功: ${message},代码：${code}`,
               type: 'success',
               duration: 2000
             })
+            this.handleFilter()
           })
         }
       })
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      try {
-        this.temp.token = Crypto.get(this.temp.token, process.env.VUE_APP_SECRET)
-      } catch (error) {
-        console.log(error)
-        this.temp.token = ''
-        this.$notify({
-          title: 'Warning',
-          message: 'Current token is not currently valid',
-          type: 'warning',
-          duration: 2000
-        })
-      }
-      try {
-        this.temp.ca = Crypto.get(this.temp.ca, process.env.VUE_APP_SECRET)
-      } catch (error) {
-        console.log(error)
-        this.temp.ca = ''
-        this.$notify({
-          title: 'Warning',
-          message: 'Current ca is not currently valid',
-          type: 'warning',
-          duration: 2000
-        })
-      }
-      // this.temp.token = Crypto.get(this.temp.token, process.env.VUE_APP_SECRET)
-      // this.temp.ca = Crypto.get(this.temp.ca, process.env.VUE_APP_SECRET)
+      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -355,33 +310,32 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateTemplate(tempData).then(() => {
-            const index = this.list.findIndex((v) => v.id === this.temp.id)
-            this.list.splice(index, 1, this.temp)
+          updateKubernetesEnvironmentConfiguration(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
+            const { message, code } = response
             this.$notify({
-              title: 'Success',
-              message: 'Update Successfully',
+              title: '成功',
+              message: `修改成功： ${message},代码：${code}`,
               type: 'success',
               duration: 2000
             })
+            this.handleFilter()
           })
         }
       })
     },
-    handleDelete(row, index) {
-      deleteTemplate(row.id).then(() => {
-        const index = this.list.findIndex((v) => v.id === this.temp.id)
-        this.list.splice(index, 1, this.temp)
+    handleDelete(row) {
+      deleteKubernetesEnvironmentConfiguration(row.id).then(response => {
+        const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({
-          title: 'Success',
-          message: 'Delete Successfully',
+          title: '成功',
+          message: `删除成功:${message},代码：${code}`,
           type: 'success',
           duration: 2000
         })
+        this.handleFilter()
       })
-      this.list.splice(index, 1)
     },
     getSortClass: function(key) {
       const sort = this.listQuery.sort

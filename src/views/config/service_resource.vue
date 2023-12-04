@@ -51,38 +51,28 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="需要CPU" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
+          <span>{{ row.request_cpu }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="需要Memory" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.request_memory }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
+      <el-table-column label="限制CPU" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
+          <span>{{ row.limit_cpu }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
+      <el-table-column label="限制Memory" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.limit_memory }}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
         width="400px"
         class-name="small-padding fixed-width"
@@ -90,14 +80,6 @@
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -124,55 +106,39 @@
         :rules="rules"
         :model="temp"
         label-position="left"
-        label-width="120px"
+        label-width="140px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
-          <el-input
-            v-model="temp.username"
+        <el-form-item label="需要CPU(m)" prop="request_cpu">
+          <el-input-number
+            v-model="temp.request_cpu"
             class="filter-item"
-            placeholder="用户名"
+            placeholder="需要CPU"
+            :min="50"
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input
-            v-model="temp.name"
+        <el-form-item label="需要Memory(MB)" prop="request_memory">
+          <el-input-number
+            v-model="temp.request_memory"
             class="filter-item"
-            placeholder="姓名"
+            placeholder="需要Memory"
+            :min="50"
           />
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
-          <el-input
-            v-model="temp.mobile"
+        <el-form-item label="限制CPU(m)" prop="limit_cpu">
+          <el-input-number
+            v-model="temp.limit_cpu"
             class="filter-item"
-            placeholder="电话"
+            placeholder="限制CPU"
+            :min="50"
           />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input
-            v-model="temp.email"
+        <el-form-item label="限制Memory(MB)" prop="limit_memory">
+          <el-input-number
+            v-model="temp.limit_memory"
             class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
-          <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
+            placeholder="限制Memory"
+            :min="50"
           />
         </el-form-item>
       </el-form>
@@ -186,31 +152,15 @@
         </el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getServiceResourceList,
+  createServiceResource,
+  updateServiceResource,
+  deleteServiceResource
+} from '@/api/service'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -225,6 +175,7 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -240,12 +191,10 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        request_cpu: 0,
+        request_memory: 0,
+        limit_cpu: 0,
+        limit_memory: 0
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +205,17 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
+        request_cpu: [
+          { required: true, message: 'request_cpu is required', trigger: 'blur' }
         ],
-        name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+        request_memory: [
+          { required: true, message: 'request_memory is required', trigger: 'blur' }
         ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
+        limit_memory: [
+          { required: true, message: 'limit_memory is required', trigger: 'blur' }
         ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
-        ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        limit_cpu: [
+          { required: true, message: 'limit_cpu is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -284,7 +227,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getServiceResourceList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,12 +264,10 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        request_cpu: 0,
+        request_memory: 0,
+        limit_cpu: 0,
+        limit_memory: 0
       }
     },
     handleCreate() {
@@ -340,7 +281,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createServiceResource(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +308,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateServiceResource(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -381,8 +322,8 @@ export default {
         }
       })
     },
-    handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+    handleDelete(row) {
+      deleteServiceResource(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({
@@ -393,7 +334,6 @@ export default {
         })
         this.handleFilter()
       })
-      this.list.splice(index, 1)
     },
     getSortClass: function(key) {
       const sort = this.listQuery.sort

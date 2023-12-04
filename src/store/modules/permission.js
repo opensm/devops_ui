@@ -47,13 +47,14 @@ const mutations = {
 }
 
 const actions = {
-  generateRoutes({ commit }, roles) {
+  generateRoutes({ commit }, user_data) {
     return new Promise(resolve => {
       let accessedRoutes
-      if (roles.includes('admin')) {
+      const { is_superuser } = user_data
+      if (is_superuser) {
         accessedRoutes = asyncRoutes || []
       } else {
-        accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
+        accessedRoutes = filterAsyncRoutes(asyncRoutes, user_data)
       }
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)

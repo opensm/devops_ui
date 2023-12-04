@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border="true"
+      border
       fit
       highlight-current-row
       style="width: 100%"
@@ -51,38 +51,23 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="ssh名称" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
+          <span>{{ row.ssh_name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="认证方式" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.ssh_type }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
+      <el-table-column label="用户" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.ssh_username }}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
         width="400px"
         class-name="small-padding fixed-width"
@@ -90,14 +75,6 @@
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -127,57 +104,45 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="ssh名称" prop="ssh_name">
           <el-input
-            v-model="temp.username"
+            v-model="temp.ssh_name"
             class="filter-item"
-            placeholder="用户名"
+            placeholder="ssh名称"
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="认证方式" prop="ssh_type">
+          <el-radio-group v-model="temp.ssh_type">
+            <el-radio-button label="password">密码</el-radio-button>
+            <el-radio-button label="publickey">密钥</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="用户" prop="ssh_username">
           <el-input
-            v-model="temp.name"
+            v-model="temp.ssh_username"
             class="filter-item"
-            placeholder="姓名"
+            placeholder="用户"
           />
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
+        <el-form-item v-if="temp.ssh_type == 'password'" label="密码" prop="ssh_password">
           <el-input
-            v-model="temp.mobile"
+            v-model="temp.ssh_password"
             class="filter-item"
-            placeholder="电话"
+            placeholder="密码"
           />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
+        <el-form-item v-if="temp.ssh_type =='publickey'" prop="ssh_public_key" label="SSH公钥">
           <el-input
-            v-model="temp.email"
+            v-model="temp.ssh_public_key"
             class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
-          <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
+            placeholder="SSH公钥"
+            type="textarea"
+            :autosize="{ minRows: 10, maxRows: 100}"
           />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false"> 取消 </el-button>
+        <el-button @click="closeDialog()"> 取消 </el-button>
         <el-button
           type="primary"
           @click="dialogStatus === 'create' ? createData() : updateData()"
@@ -186,31 +151,15 @@
         </el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getSshKeyList,
+  createSshKey,
+  updateSshKey,
+  deleteSshKey
+} from '@/api/sshkey'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -240,12 +189,11 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        ssh_name: '',
+        ssh_type: 'password',
+        ssh_username: '',
+        ssh_password: '',
+        ssh_public_key: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +204,20 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
+        ssh_name: [
+          { required: true, message: 'ssh_name is required', trigger: 'blur' }
         ],
-        name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+        ssh_type: [
+          { required: true, message: 'ssh_type is required', trigger: 'blur' }
         ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
+        ssh_username: [
+          { required: true, message: 'ssh_username is required', trigger: 'blur' }
         ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
+        ssh_password: [
+          { required: true, message: 'ssh_password is required', trigger: 'blur' }
         ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        ssh_public_key: [
+          { required: true, message: 'ssh_public_key is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -282,9 +227,13 @@ export default {
     this.getList()
   },
   methods: {
+    closeDialog() {
+      this.dialogFormVisible = false
+      this.resetTemp()
+    },
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getSshKeyList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,16 +270,14 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        ssh_name: '',
+        ssh_type: '',
+        ssh_username: '',
+        ssh_password: '',
+        ssh_public_key: ''
       }
     },
     handleCreate() {
-      this.resetTemp()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -340,7 +287,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createSshKey(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -349,6 +296,7 @@ export default {
               type: 'success',
               duration: 2000
             })
+            this.resetTemp()
             this.handleFilter()
           })
         }
@@ -367,7 +315,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateSshKey(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -382,7 +330,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+      deleteSshKey(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({

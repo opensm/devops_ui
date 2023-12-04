@@ -129,7 +129,7 @@
             placeholder="Please put the token"
           />
         </el-form-item>
-        <el-form-item label="ldap_bindpass" prop="ldap_bindpass">
+        <el-form-item v-if="dialogStatus!='update'" label="ldap_bindpass" prop="ldap_bindpass">
           <el-input
             v-model="temp.ldap_bindpass"
             class="filter-item"
@@ -229,8 +229,8 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '修改',
+        create: '新增'
       },
       dialogPvVisible: false,
       pvData: [],
@@ -316,15 +316,16 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createldap(this.temp).then(() => {
-            this.list.unshift(this.temp)
+          createldap(this.temp).then(response => {
             this.dialogFormVisible = false
+            const { message, code } = response
             this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
+              title: '成功',
+              message: `创建成功: ${message},代码：${code}`,
               type: 'success',
               duration: 2000
             })
+            this.handleFilter()
           })
         }
       })
@@ -342,32 +343,31 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          console.log(tempData)
-          updateldap(tempData).then(() => {
-            const index = this.list.findIndex((v) => v.id === this.temp.id)
-            this.list.splice(index, 1, this.temp)
+          updateldap(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
+            const { message, code } = response
             this.$notify({
-              title: 'Success',
-              message: 'Update Successfully',
+              title: '成功',
+              message: `修改成功： ${message},代码：${code}`,
               type: 'success',
               duration: 2000
             })
+            this.handleFilter()
           })
         }
       })
     },
     handleDelete(row, index) {
-      deleteldap(index).then(() => {
-        const index = this.list.findIndex((v) => v.id === this.temp.id)
-        this.list.splice(index, 1, this.temp)
+      deleteldap(row.id).then(response => {
+        const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({
-          title: 'Success',
-          message: 'Delete Successfully',
+          title: '成功',
+          message: `删除成功:${message},代码：${code}`,
           type: 'success',
           duration: 2000
         })
+        this.handleFilter()
       })
       this.list.splice(index, 1)
     },

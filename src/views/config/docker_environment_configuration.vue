@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border="true"
+      border
       fit
       highlight-current-row
       style="width: 100%"
@@ -51,38 +51,23 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="docker部署所在主机" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
+          <span>{{ row.docker_instances }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="ssh所属的KEY" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.docker_ssh }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
+      <el-table-column label="docker副本数" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.docker_replica_count }}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
         width="400px"
         class-name="small-padding fixed-width"
@@ -90,14 +75,6 @@
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -127,52 +104,24 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="宿主机" prop="docker_instances">
           <el-input
-            v-model="temp.username"
+            v-model="temp.docker_instances"
             class="filter-item"
-            placeholder="用户名"
+            placeholder="docker部署所在主机"
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input
-            v-model="temp.name"
+        <el-form-item label="ssh所属的KEY" prop="docker_ssh">
+          <el-select v-model="temp.docker_ssh" v-for="(ssh,index) in selectList" :key="ssh.id">
+            <el-option :value="ssh.id" :label="ssh.ssh_name"> {{ ssh.ssh_name }}</el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="docker副本数" prop="docker_replica_count">
+          <el-input-number
+            v-model="temp.docker_replica_count"
             class="filter-item"
-            placeholder="姓名"
-          />
-        </el-form-item>
-        <el-form-item label="电话" prop="mobile">
-          <el-input
-            v-model="temp.mobile"
-            class="filter-item"
-            placeholder="电话"
-          />
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input
-            v-model="temp.email"
-            class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
-          <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
+            placeholder="docker副本数"
+            :min="1"
           />
         </el-form-item>
       </el-form>
@@ -186,32 +135,17 @@
         </el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getDockerEnvironmentConfigurationList,
+  createDockerEnvironmentConfiguration,
+  updateDockerEnvironmentConfiguration,
+  deleteDockerEnvironmentConfiguration
+} from '@/api/config'
 import waves from '@/directive/waves' // waves directive
+import { getSshKeyList } from "@/api/sshkey";
 import Pagination from '@/components/Pagination'
 export default {
   name: 'ComplexTable',
@@ -225,6 +159,7 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -240,12 +175,9 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        docker_instances: '',
+        docker_ssh: '',
+        docker_replica_count: 0
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +188,14 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
+        docker_instances: [
+          { required: true, message: 'docker_instances is required', trigger: 'blur' }
         ],
-        name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+        docker_ssh: [
+          { required: true, message: 'docker_ssh is required', trigger: 'blur' }
         ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
-        ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
-        ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        docker_replica_count: [
+          { required: true, message: 'docker_replica_count is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -280,11 +203,17 @@ export default {
   },
   created() {
     this.getList()
+    this.getSSHKey()
   },
   methods: {
+    getSSHKey(){
+      getSshKeyList().then((response => {
+        this.selectList = response.data
+      }))
+    },
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getDockerEnvironmentConfigurationList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,12 +250,9 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        docker_instances: '',
+        docker_ssh: '',
+        docker_replica_count: 0
       }
     },
     handleCreate() {
@@ -340,7 +266,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createDockerEnvironmentConfiguration(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +293,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateDockerEnvironmentConfiguration(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -381,8 +307,8 @@ export default {
         }
       })
     },
-    handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+    handleDelete(row) {
+      deleteDockerEnvironmentConfiguration(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({
@@ -393,7 +319,6 @@ export default {
         })
         this.handleFilter()
       })
-      this.list.splice(index, 1)
     },
     getSortClass: function(key) {
       const sort = this.listQuery.sort

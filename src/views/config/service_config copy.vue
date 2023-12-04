@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border="true"
+      border
       fit
       highlight-current-row
       style="width: 100%"
@@ -51,38 +51,28 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="服务名称" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
+          <span>{{ row.service_name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="文件内容" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.content }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
+      <el-table-column label="配置类型" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
+          <span>{{ row.content_type }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
+      <el-table-column label="备注" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.description }}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
         width="400px"
         class-name="small-padding fixed-width"
@@ -90,14 +80,6 @@
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -127,52 +109,42 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="服务名称" prop="service_name">
           <el-input
-            v-model="temp.username"
+            v-model="temp.service_name"
             class="filter-item"
-            placeholder="用户名"
+            placeholder="服务名称"
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="文件内容" prop="content">
+          <!-- <el-input
+            v-model="temp.content"
+            class="filter-item"
+            placeholder="文件内容"
+            type="textarea"
+          /> -->
+          <InCoder
+            ref="codemirror"
+            class="details_centerCode Codemirrors"
+            :autofocus-flg="false"
+            :read-only-flg="false"
+            :mode-flg="false"
+            :value="temp.content"
+            @input="codemirrorCode($event,index)"
+          />
+        </el-form-item>
+        <el-form-item label="配置类型" prop="content_type">
           <el-input
-            v-model="temp.name"
+            v-model="temp.content_type"
             class="filter-item"
-            placeholder="姓名"
+            placeholder="配置类型"
           />
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
+        <el-form-item label="备注" prop="description">
           <el-input
-            v-model="temp.mobile"
+            v-model="temp.description"
             class="filter-item"
-            placeholder="电话"
-          />
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input
-            v-model="temp.email"
-            class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
-          <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
+            placeholder="备注"
           />
         </el-form-item>
       </el-form>
@@ -186,37 +158,26 @@
         </el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getServiceConfigList,
+  createServiceConfig,
+  updateServiceConfig,
+  deleteServiceConfig
+} from '@/api/service'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
+import InCoder from '@/components/Codemirror/index'
+// import 'codemirror/theme/monokai.css'
+// import 'codemirror/mode/python/python.js'
+
 export default {
   name: 'ComplexTable',
   components: {
-    Pagination
+    Pagination,
+    InCoder
   },
   directives: { waves },
   data() {
@@ -225,6 +186,9 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      cmTheme: 'monokai',
+      cmMode: 'python',
+      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -240,12 +204,10 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        service_name: '',
+        content: '',
+        content_type: '',
+        description: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +218,14 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
+        service_name: [
+          { required: true, message: 'service_name is required', trigger: 'blur' }
         ],
-        name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+        content: [
+          { required: true, message: 'content is required', trigger: 'blur' }
         ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
-        ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
-        ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        content_type: [
+          { required: true, message: 'content_type is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -284,7 +237,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getServiceConfigList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,12 +274,10 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
-        name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        service_name: '',
+        content: '',
+        content_type: '',
+        description: ''
       }
     },
     handleCreate() {
@@ -340,7 +291,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createServiceConfig(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +318,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateServiceConfig(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -382,7 +333,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+      deleteServiceConfig(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({
@@ -402,3 +353,14 @@ export default {
   }
 }
 </script>
+
+<style>
+.CodeMirror {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  margin-top: 10px;
+}
+</style>
+<style lang="scss" scoped>
+</style>

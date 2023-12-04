@@ -1,30 +1,30 @@
 import request from '@/utils/request'
 
-export function getldapList(query) {
+export function getRoleList(query) {
   return request({
-    url: '/auth/ldaps',
+    url: '/auth/roles',
     method: 'get',
     params: query
   })
 }
 
-export function createldap(data) {
+export function createRole(data) {
   return request({
-    url: '/auth/ldaps',
+    url: '/auth/roles',
     method: 'post',
     data
   })
 }
-export function deleteldap(id) {
+export function deleteRole(id) {
   return request({
-    url: `/auth/ldap/${id}`,
+    url: `/auth/role/${id}`,
     method: 'delete'
   })
 }
 
-export function updateldap(id, data) {
+export function updateRole(id, data) {
   return request({
-    url: `/auth/ldap/${id}`,
+    url: `/auth/role/${id}`,
     method: 'put',
     data
   })

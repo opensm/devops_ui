@@ -1,0 +1,518 @@
+<template>
+  <div class="app-container">
+    <div class="filter-container">
+      <el-input
+        v-model="listQuery.name"
+        placeholder="Title"
+        style="width: 200px"
+        class="filter-item"
+        @keyup.enter.native="handleFilter"
+      />
+      <el-button
+        v-waves
+        style="margin-left: 10px"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-search"
+        @click="handleFilter"
+      >
+        搜索
+      </el-button>
+      <el-button
+        class="filter-item"
+        style="margin-left: 10px"
+        type="primary"
+        icon="el-icon-edit"
+        @click="handleCreate"
+      >
+        新增
+      </el-button>
+    </div>
+
+    <el-table
+      :key="tableKey"
+      v-loading="listLoading"
+      :data="list"
+      border="true"
+      fit
+      highlight-current-row
+      style="width: 100%"
+      @sort-change="sortChange"
+    >
+      <el-table-column
+        label="ID"
+        prop="id"
+        sortable="custom"
+        align="center"
+        width="80"
+        :class-name="getSortClass('id')"
+      >
+        <template slot-scope="{ row }">
+          <span>{{ row.id }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="服务名称" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="端口列表" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_ports }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="默认配置文件" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_config }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="代码仓库地址" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_git }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="默认编译命令" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_compile }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="默认环境变量列表" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_environment }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="就绪探针" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_readiness }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="存活探针" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_liveness }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="监控接口启用" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_prometheus_enable }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="配置对外域名启用" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_domain_enable }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="skywalking启用" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.service_skywalking_enable }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="操作"
+        align="center"
+        width="400px"
+        class-name="small-padding fixed-width"
+      >
+        <template slot-scope="{ row, $index }">
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+            编辑
+          </el-button>
+          <el-button
+            v-if="row.status != 'deleted'"
+            size="mini"
+            type="danger"
+            @click="handleDelete(row, $index)"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.limit"
+      @pagination="getList"
+    />
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="temp"
+        label-position="left"
+        label-width="180px"
+        style="width: 400px; margin-left: 50px"
+      >
+        <el-form-item label="服务名称" prop="service_name">
+          <el-input
+            v-model="temp.service_name"
+            class="filter-item"
+            placeholder="服务名称"
+          />
+        </el-form-item>
+        <el-form-item label="端口是否启用" prop="service_ports_enable">
+          <el-switch
+            v-model="temp.service_ports_enable"
+            style="display: block"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="是"
+            inactive-text="否"
+          />
+        </el-form-item>
+        <el-form-item v-if="temp.service_ports_enable" label="端口列表" prop="service_ports">
+          <el-input
+            v-model="temp.service_ports"
+            class="filter-item"
+            placeholder="端口列表"
+          />
+        </el-form-item>
+        <el-form-item label="默认配置文件" prop="service_config">
+          <el-input
+            v-model="temp.service_config"
+            class="filter-item"
+            placeholder="默认配置文件"
+          />
+        </el-form-item>
+        <el-form-item label="代码仓库地址" prop="service_git">
+          <el-input
+            v-model="temp.service_git"
+            class="filter-item"
+            placeholder="代码仓库地址"
+          />
+        </el-form-item>
+        <el-form-item label="默认编译命令" prop="service_compile">
+          <el-input
+            v-model="temp.service_compile"
+            class="filter-item"
+            placeholder="maven install"
+          />
+        </el-form-item>
+        <el-form-item label="默认环境变量列表" prop="service_environment">
+          <el-input
+            v-model="temp.service_environment"
+            class="filter-item"
+            placeholder="默认环境变量列表"
+          />
+        </el-form-item>
+        <el-form-item label="健康检查启用" prop="service_healthy">
+          <el-switch
+            v-model="temp.service_healthy"
+            style="display: block"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="是"
+            inactive-text="否"
+          />
+        </el-form-item>
+        <el-form-item v-if="temp.service_healthy" label="就绪探针" prop="service_readiness">
+          <el-input
+            v-model="temp.service_readiness"
+            class="filter-item"
+            placeholder="就绪探针"
+          />
+        </el-form-item>
+        <el-form-item v-if="temp.service_healthy" label="存活探针" prop="service_liveness">
+          <el-input
+            v-model="temp.service_liveness"
+            class="filter-item"
+            placeholder="存活探针"
+          />
+        </el-form-item>
+        <el-form-item label="监控接口启用" prop="service_prometheus_enable">
+          <el-switch
+            v-model="temp.service_prometheus_enable"
+            style="display: block"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="是"
+            inactive-text="否"
+          />
+        </el-form-item>
+        <el-form-item v-if="temp.service_prometheus_enable" label="监控接口" prop="service_prometheus">
+          <el-input
+            v-model="temp.service_prometheus"
+            class="filter-item"
+            placeholder="监控接口"
+          />
+        </el-form-item>
+        <el-form-item label="配置域名启用" prop="service_domain_enable">
+          <el-switch
+            v-model="temp.service_domain_enable"
+            style="display: block"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="是"
+            inactive-text="否"
+          />
+        </el-form-item>
+        <el-form-item v-if="temp.service_domain_enable" label="配置对外域" prop="service_domain">
+          <el-input
+            v-model="temp.service_domain"
+            class="filter-item"
+            placeholder="配置对外域"
+          />
+        </el-form-item>
+        <el-form-item label="skywalking启用" prop="service_skywalking_enable">
+          <el-switch
+            v-model="temp.service_skywalking_enable"
+            style="display: block"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="是"
+            inactive-text="否"
+          />
+        </el-form-item>
+        <el-form-item v-if="temp.service_skywalking_enable" label="skywalking" prop="service_skywalking">
+          <el-input
+            v-model="temp.service_skywalking"
+            class="filter-item"
+            placeholder="skywalking"
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false"> 取消 </el-button>
+        <el-button
+          type="primary"
+          @click="dialogStatus === 'create' ? createData() : updateData()"
+        >
+          确认
+        </el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+<script>
+import {
+  getServiceList,
+  createService,
+  updateService,
+  deleteService
+} from '@/api/service'
+import waves from '@/directive/waves' // waves directive
+import Pagination from '@/components/Pagination'
+import { checkSpecialKey } from '@/utils/validate'
+export default {
+  name: 'ComplexTable',
+  components: {
+    Pagination
+  },
+  directives: { waves },
+  data() {
+    return {
+      tableKey: 0,
+      list: null,
+      total: 0,
+      listLoading: true,
+      selectList: [],
+      listQuery: {
+        page: 1,
+        limit: 20,
+        importance: undefined,
+        title: undefined,
+        type: undefined,
+        sort: '+id'
+      },
+      sortOptions: [
+        { label: 'ID Ascending', key: '+id' },
+        { label: 'ID Descending', key: '-id' }
+      ],
+      showReviewer: false,
+      temp: {
+        id: undefined,
+        service_name: '',
+        service_ports_enable: false,
+        service_ports: {},
+        service_config: [],
+        service_git: '',
+        service_compile: 'clean package -Dmaven.test.skip=true',
+        service_environment_enable: false,
+        service_environment: {},
+        service_healthy_enable: false,
+        service_readiness: {},
+        service_liveness: {},
+        service_prometheus_enable: false,
+        service_prometheus: {},
+        service_domain_enable: false,
+        service_domain: {},
+        service_skywalking_enable: false,
+        service_skywalking: {}
+      },
+      dialogFormVisible: false,
+      dialogStatus: '',
+      textMap: {
+        update: '修改',
+        create: '新增'
+      },
+      dialogPvVisible: false,
+      pvData: [],
+      rules: {
+        service_name: [
+          { required: true, message: 'service_name is required', trigger: 'blur' },
+          { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
+          { validator: checkSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
+        ],
+        service_ports: [
+          { required: true, message: 'service_ports is required', trigger: 'blur' }
+        ],
+        service_ports_enable: [
+          { required: true, message: 'service_ports_enable is required', trigger: 'blur' }
+        ],
+        service_git: [
+          { required: true, message: 'service_git is required', trigger: 'blur' }
+        ],
+        service_compile: [
+          { required: true, message: 'service_compile is required', trigger: 'blur' }
+        ],
+        service_healthy_enable: [
+          { required: true, message: 'service_healthy_enable is required', trigger: 'blur' }
+        ],
+        service_prometheus_enable: [
+          { required: true, message: 'service_prometheus_enable is required', trigger: 'blur' }
+        ],
+        service_domain_enable: [
+          { required: true, message: 'service_domain_enable is required', trigger: 'blur' }
+        ],
+        service_skywalking_enable: [
+          { required: true, message: 'service_skywalking_enable is required', trigger: 'blur' }
+        ]
+      },
+      downloadLoading: false
+    }
+  },
+  created() {
+    this.getList()
+  },
+  methods: {
+    getList() {
+      this.listLoading = true
+      getServiceList(this.listQuery).then((response) => {
+        this.list = response.data
+        this.total = response.total
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
+      })
+    },
+    handleFilter() {
+      this.listQuery.page = 1
+      this.getList()
+    },
+    handleModifyStatus(row, status) {
+      this.$message({
+        message: '操作Success',
+        type: 'success'
+      })
+      row.status = status
+    },
+    sortChange(data) {
+      const { prop, order } = data
+      if (prop === 'id') {
+        this.sortByID(order)
+      }
+    },
+    sortByID(order) {
+      if (order === 'ascending') {
+        this.listQuery.sort = '+id'
+      } else {
+        this.listQuery.sort = '-id'
+      }
+      this.handleFilter()
+    },
+    resetTemp() {
+      this.temp = {
+        id: undefined,
+        service_name: '',
+        service_ports_enable: false,
+        service_ports: {},
+        service_config: [],
+        service_git: '',
+        service_compile: 'clean package -Dmaven.test.skip=true',
+        service_environment_enable: false,
+        service_environment: {},
+        service_healthy: false,
+        service_readiness: {},
+        service_liveness: {},
+        service_prometheus_enable: false,
+        service_prometheus: {},
+        service_domain_enable: false,
+        service_domain: {},
+        service_skywalking_enable: false,
+        service_skywalking: {}
+      }
+    },
+    handleCreate() {
+      this.resetTemp()
+      this.dialogStatus = 'create'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    createData() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          createService(this.temp).then(response => {
+            this.dialogFormVisible = false
+            const { message, code } = response
+            this.$notify({
+              title: '成功',
+              message: `创建成功: ${message},代码：${code}`,
+              type: 'success',
+              duration: 2000
+            })
+            this.handleFilter()
+          })
+        }
+      })
+    },
+    handleUpdate(row) {
+      this.temp = Object.assign({}, row) // copy obj
+      this.temp.timestamp = new Date(this.temp.timestamp)
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    updateData() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          const tempData = Object.assign({}, this.temp)
+          updateService(tempData.id, tempData).then(response => {
+            this.dialogFormVisible = false
+            const { message, code } = response
+            this.$notify({
+              title: '成功',
+              message: `修改成功： ${message},代码：${code}`,
+              type: 'success',
+              duration: 2000
+            })
+            this.handleFilter()
+          })
+        }
+      })
+    },
+    handleDelete(row) {
+      deleteService(row.id).then(response => {
+        const { message, code } = response
+        this.dialogFormVisible = false
+        this.$notify({
+          title: '成功',
+          message: `删除成功:${message},代码：${code}`,
+          type: 'success',
+          duration: 2000
+        })
+        this.handleFilter()
+      })
+    },
+    getSortClass: function(key) {
+      const sort = this.listQuery.sort
+      return sort === `+${key}` ? 'ascending' : 'descending'
+    }
+  }
+}
+</script>

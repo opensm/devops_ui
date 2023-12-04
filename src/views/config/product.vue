@@ -51,34 +51,24 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" width="110px" align="center">
+      <el-table-column label="部署服务" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
+          <span>{{ row.service_environment }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" width="auto" align="center">
+      <el-table-column label="镜像地址" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.images }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="电话" width="auto" align="center">
+      <el-table-column label="是否有效" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.mobile }}</span>
+          <span>{{ row.status }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="邮箱" width="auto" align="center">
+      <el-table-column label="是否部署" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.email }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="有效" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="上次登录" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.last_login }}</span>
+          <span>{{ row.install_status }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -90,14 +80,6 @@
         <template slot-scope="{ row, $index }">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
-          </el-button>
-          <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
           </el-button>
           <el-button
             v-if="row.status != 'deleted'"
@@ -127,52 +109,32 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="部署服务" prop="name">
           <el-input
-            v-model="temp.username"
+            v-model="temp.service_environment"
             class="filter-item"
-            placeholder="用户名"
+            placeholder="部署服务"
           />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="镜像地址" prop="images">
           <el-input
-            v-model="temp.name"
+            v-model="temp.images"
             class="filter-item"
-            placeholder="姓名"
+            placeholder="镜像地址"
           />
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
+        <el-form-item label="是否有效" prop="status">
           <el-input
-            v-model="temp.mobile"
+            v-model="temp.status"
             class="filter-item"
-            placeholder="电话"
+            placeholder="是否有效"
           />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
+        <el-form-item label="是否部署" prop="install_status">
           <el-input
-            v-model="temp.email"
+            v-model="temp.install_status"
             class="filter-item"
-            placeholder="邮箱"
-          />
-        </el-form-item>
-        <el-form-item label="有效" prop="is_active">
-          <el-switch
-            v-model="temp.is_active"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
-          />
-        </el-form-item>
-        <el-form-item label="超级用户" prop="is_superuser">
-          <el-switch
-            v-model="temp.is_superuser"
-            style="display: block"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="是"
-            inactive-text="否"
+            placeholder="是否部署"
           />
         </el-form-item>
       </el-form>
@@ -206,11 +168,11 @@
 </template>
 <script>
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser
-} from '@/api/user'
+  getProductList,
+  createProduct,
+  updateProduct,
+  deleteProduct
+} from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -240,12 +202,10 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        username: '',
         name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        images: '',
+        install_status: '',
+        status: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -256,23 +216,16 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [
-          { required: true, message: 'username is required', trigger: 'change' }
-        ],
         name: [
           { required: true, message: 'name is required', trigger: 'blur' }
         ],
-        mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
+        images: [
+          { required: true, message: 'images is required', trigger: 'blur' }
         ],
-        email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
-        ],
-        is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
-        ],
-        is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+        status: [
+          { required: true, message: 'status is required', trigger: 'blur' }
+        ], install_status: [
+          { required: true, message: 'install_status is required', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -284,7 +237,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getUsers(this.listQuery).then((response) => {
+      getProductList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -321,12 +274,8 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        username: '',
         name: '',
-        mobile: '',
-        email: '',
-        is_active: '',
-        is_superuser: ''
+        images: ''
       }
     },
     handleCreate() {
@@ -340,7 +289,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createUser(this.temp).then(response => {
+          createProduct(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -367,7 +316,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(response => {
+          updateProduct(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -382,7 +331,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteUser(row.id).then(response => {
+      deleteProduct(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({

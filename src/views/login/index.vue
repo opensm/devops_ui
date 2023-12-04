@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">更新工单后台</h3>
+        <h3 class="title">运维发布后台</h3>
       </div>
 
       <el-form-item prop="username">
@@ -41,12 +41,12 @@
         </span>
       </el-form-item>
       <el-form-item prop="ldap">
-          <el-switch v-model="loginForm.ldap" active-color="#13ce66" inactive-color="#ff4949"/>
+        <el-switch v-model="loginForm.ldap" active-color="#13ce66" inactive-color="#ff4949" />
       </el-form-item>
 
       <!-- <div class="tips"><el-switch v-model="loginForm.ldap" active-color="#13ce66" inactive-color="#ff4949" name="ldap"/></div> -->
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
 
     </el-form>
   </div>
@@ -54,7 +54,7 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
-import Crypto from '@/utils/secret'
+// import Crypto from '@/utils/secret'
 
 export default {
   name: 'Login',
@@ -75,17 +75,20 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: 'KpcVJdbRkNWt',
+        username: '',
+        password: '',
         ldap: 1
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        username: [
+          { required: true, trigger: 'blur', message: 'username is required' },
+          { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' }
+        ],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: '/dashboard'
     }
   },
   watch: {
@@ -112,7 +115,7 @@ export default {
         if (valid) {
           this.loading = true
           const tmp_password = this.password
-          this.loginForm.password = Crypto.set(this.loginForm.password, process.env.VUE_APP_SECRET)
+          // this.loginForm.password = Crypto.set(this.loginForm.password, process.env.VUE_APP_SECRET)
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/dashboard' })
             this.loading = false
