@@ -57,6 +57,12 @@ export function deleteService(id) {
     method: 'delete'
   })
 }
+export function getService(id) {
+  return request({
+    url: `/config/service/${id}`,
+    method: 'get'
+  })
+}
 
 export function updateService(id, data) {
   return request({
