@@ -13,7 +13,12 @@ export default {
     ...mapGetters([
       'name', 'publickey'
     ])
-  }
+  },
+  data(){
+    return{
+      names:window.localStorage.getItem('loginnames')
+    }
+  },
 }
 </script>
 

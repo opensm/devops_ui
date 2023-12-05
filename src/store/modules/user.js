@@ -25,6 +25,7 @@ const mutations = {
     state.name = name
   },
   SET_AVATAR: (state, avatar) => {
+    window.localStorage.setItem('avatar', avatar)
     state.avatar = avatar
   },
   SET_PUBLICKEY: (state, publickey) => {
@@ -44,6 +45,7 @@ const actions = {
         setToken(`Bearer ${access}`)
         setPubicKey(`${public_key}`)
         const { name } = jwtDecode(access)
+        window.localStorage.setItem('loginnames', name)
         commit('SET_NAME', name)
         commit('SET_AVATAR', 'https://pic1.zhimg.com/80/v2-d327ca21ec78d29675b0b500607e2440_720w.webp')
         resolve()
