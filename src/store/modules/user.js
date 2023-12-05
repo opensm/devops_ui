@@ -1,5 +1,5 @@
 import { login, refresh } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, removeToken, setPubicKey } from '@/utils/auth'
 import { resetRouter } from '@/router'
 import { jwtDecode } from 'jwt-decode'
 
@@ -7,7 +7,8 @@ const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
-    avatar: ''
+    avatar: '',
+    publickey: ''
   }
 }
 
@@ -25,6 +26,9 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_PUBLICKEY: (state, publickey) => {
+    state.publickey = publickey
   }
 }
 
@@ -34,9 +38,11 @@ const actions = {
     const { username, password, ldap } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password, ldap: ldap }).then(response => {
-        const { access } = response.data
+        const { access, public_key } = response.data
         commit('SET_TOKEN', `Bearer ${access}`)
+        commit('SET_PUBLICKEY', public_key)
         setToken(`Bearer ${access}`)
+        setPubicKey(`${public_key}`)
         const { name } = jwtDecode(access)
         commit('SET_NAME', name)
         commit('SET_AVATAR', 'https://pic1.zhimg.com/80/v2-d327ca21ec78d29675b0b500607e2440_720w.webp')

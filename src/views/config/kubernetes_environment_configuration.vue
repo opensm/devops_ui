@@ -125,7 +125,7 @@
           />
         </el-form-item>
         <el-form-item label="Kubernetes信息" prop="kubernetes_auth">
-          <el-select v-for="(k8s,index) in selectList" :key="k8s.id" v-model="temp.kubernetes_auth">
+          <el-select v-for="(k8s) in selectList" :key="k8s.id" v-model="temp.kubernetes_auth">
             <el-option :value="k8s.id" :label="k8s.name">{{ k8s.name }}</el-option>
           </el-select>
         </el-form-item>
@@ -157,7 +157,6 @@ import {
   deleteKubernetesEnvironmentConfiguration
 } from '@/api/config'
 import { getKubernetesList } from '@/api/kubernetes'
-import { getDockerEnvironmentConfigurationList } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -221,8 +220,8 @@ export default {
     this.getKubernetes()
   },
   methods: {
-    getKubernetes(){
-      getKubernetesList().then(( response ) => {
+    getKubernetes() {
+      getKubernetesList().then(response => {
         this.selectList = response.data
       })
     },

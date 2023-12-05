@@ -112,7 +112,7 @@
           />
         </el-form-item>
         <el-form-item label="ssh所属的KEY" prop="docker_ssh">
-          <el-select v-model="temp.docker_ssh" v-for="(ssh,index) in selectList" :key="ssh.id">
+          <el-select v-for="ssh in selectList" :key="ssh.id" v-model="temp.docker_ssh">
             <el-option :value="ssh.id" :label="ssh.ssh_name"> {{ ssh.ssh_name }}</el-option>
           </el-select>
         </el-form-item>
@@ -145,7 +145,7 @@ import {
   deleteDockerEnvironmentConfiguration
 } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
-import { getSshKeyList } from "@/api/sshkey";
+import { getSshKeyList } from '@/api/sshkey'
 import Pagination from '@/components/Pagination'
 export default {
   name: 'ComplexTable',
@@ -206,10 +206,10 @@ export default {
     this.getSSHKey()
   },
   methods: {
-    getSSHKey(){
-      getSshKeyList().then((response => {
+    getSSHKey() {
+      getSshKeyList().then(response => {
         this.selectList = response.data
-      }))
+      })
     },
     getList() {
       this.listLoading = true
