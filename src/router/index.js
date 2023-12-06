@@ -67,8 +67,8 @@ export const constantRoutes = [
     },
     children: [
       {
-        path: 'table',
-        name: 'Table',
+        path: 'user',
+        name: 'user',
         component: () => import('@/views/auth/users'),
         meta: {
           title: '用户',
@@ -77,8 +77,8 @@ export const constantRoutes = [
         }
       },
       {
-        path: 'tree',
-        name: 'Tree',
+        path: 'role',
+        name: 'role',
         component: () => import('@/views/auth/roles'),
         meta: {
           title: '角色',
@@ -92,7 +92,7 @@ export const constantRoutes = [
         component: () => import('@/views/auth/permission'),
         meta: {
           title: '权限',
-          icon: 'tree',
+          icon: 'el-icon-unlock',
           roles: ['admin', 'manager']
         }
       },
@@ -102,7 +102,7 @@ export const constantRoutes = [
         component: () => import('@/views/auth/ldap'),
         meta: {
           title: 'LDAP|AD',
-          icon: 'tree',
+          icon: 'el-icon-paperclip',
           roles: ['admin', 'manager']
         }
       }
@@ -116,7 +116,7 @@ export const constantRoutes = [
     roles: ['admin', 'manager'],
     meta: {
       title: '配置中心',
-      icon: 'el-icon-s-help',
+      icon: 'el-icon-s-cooperation',
       roles: ['admin', 'manager']
     },
     children: [
@@ -126,7 +126,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/environment'),
         meta: {
           title: '环境配置',
-          icon: 'tree',
+          icon: 'el-icon-discount',
           roles: ['admin', 'manager']
         }
       },
@@ -135,8 +135,8 @@ export const constantRoutes = [
         name: 'kubernetes',
         component: () => import('@/views/config/kubernetes'),
         meta: {
-          title: 'Kubernetes容器',
-          icon: 'table',
+          title: 'Kubernetes',
+          icon: 'el-icon-bangzhu',
           roles: ['admin', 'manager']
         }
       },
@@ -160,7 +160,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/sshkey'),
         meta: {
           title: 'SSH密钥',
-          icon: 'table',
+          icon: 'el-icon-suitcase',
           roles: ['admin', 'manager']
         }
       },
@@ -170,7 +170,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/service_config'),
         meta: {
           title: '服务配置文件',
-          icon: 'table',
+          icon: 'el-icon-suitcase-1',
           roles: ['admin', 'manager']
         }
       },
@@ -194,7 +194,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/service'),
         meta: {
           title: '服务列表',
-          icon: 'table',
+          icon: 'el-icon-notebook-2',
           roles: ['admin', 'manager']
         }
       },
@@ -218,7 +218,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/service_resource'),
         meta: {
           title: '服务资源',
-          icon: 'table',
+          icon: 'el-icon-s-platform',
           roles: ['admin', 'manager']
         }
       },
@@ -228,7 +228,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/kubernetes_environment_configuration'),
         meta: {
           title: '服务K8S环境配置',
-          icon: 'table',
+          icon: 'el-icon-s-release',
           roles: ['admin', 'manager']
         }
       },
@@ -238,7 +238,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/docker_environment_configuration'),
         meta: {
           title: '服务docker环境配置',
-          icon: 'table',
+          icon: 'el-icon-s-management',
           roles: ['admin', 'manager']
         }
       },
@@ -248,7 +248,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/service_environment'),
         meta: {
           title: '服务部署配置',
-          icon: 'table',
+          icon: 'el-icon-s-flag',
           roles: ['admin', 'manager']
         }
       },
@@ -268,7 +268,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/kubernetes_helm_chart'),
         meta: {
           title: 'HELM 模板',
-          icon: 'table',
+          icon: 'el-icon-s-data',
           roles: ['admin', 'manager']
         }
       },
@@ -278,7 +278,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/product'),
         meta: {
           title: 'Docker制品',
-          icon: 'table',
+          icon: 'el-icon-menu',
           roles: ['admin', 'manager']
         }
       },
@@ -288,7 +288,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/db'),
         meta: {
           title: '数据库配置',
-          icon: 'table',
+          icon: 'el-icon-files',
           roles: ['admin', 'manager']
         }
       },
@@ -298,7 +298,7 @@ export const constantRoutes = [
         component: () => import('@/views/config/project'),
         meta: {
           title: '项目',
-          icon: 'wechat',
+          icon: 'el-icon-pie-chart',
           roles: ['admin', 'manager']
         }
       }

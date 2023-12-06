@@ -20,6 +20,7 @@
     "crypto-js": "^4.1.1",
     "element-ui": "2.13.2",
     "js-cookie": "2.2.0",
+    "jsencrypt": "^3.3.2",
     "jsonlint": "^1.6.3",
     "jwt-decode": "^4.0.0",
     "normalize.css": "7.0.0",

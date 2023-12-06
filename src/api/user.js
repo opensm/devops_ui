@@ -7,6 +7,12 @@ export function login(data) {
     data
   })
 }
+export function publicKey() {
+  return request({
+    url: '/auth/publickey',
+    method: 'get'
+  })
+}
 
 export function refresh() {
   return request({

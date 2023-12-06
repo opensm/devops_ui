@@ -53,19 +53,13 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
-// import Crypto from '@/utils/secret'
+import { publicKey } from '@/api/user'
+import { enSecret } from '@/utils/secret'
+import { checkSpecialKey } from '@/utils/validate'
 
 export default {
   name: 'Login',
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
-      } else {
-        callback()
-      }
-    }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
         callback(new Error('The password can not be less than 6 digits'))
@@ -74,6 +68,7 @@ export default {
       }
     }
     return {
+      publicKey: '',
       loginForm: {
         username: '',
         password: '',
@@ -81,8 +76,9 @@ export default {
       },
       loginRules: {
         username: [
-          { required: true, trigger: 'blur', message: 'username is required' },
-          { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' }
+          { required: true, trigger: 'blur', message: '请填入用户名' },
+          { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
+          { validator: checkSpecialKey, message: '请不要填入特殊字符', trigger: 'blur' }
         ],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
@@ -99,7 +95,15 @@ export default {
       immediate: true
     }
   },
+  created() {
+    this.getPublicKey()
+  },
   methods: {
+    getPublicKey() {
+      publicKey().then(response => {
+        this.publicKey = response.data.publickey
+      })
+    },
     showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
@@ -114,8 +118,8 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          const tmp_password = this.password
-          // this.loginForm.password = Crypto.set(this.loginForm.password, process.env.VUE_APP_SECRET)
+          // const tmp_password = this.password
+          const tmp_password = enSecret(this.loginForm.password, this.publicKey)
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/dashboard' })
             this.loading = false

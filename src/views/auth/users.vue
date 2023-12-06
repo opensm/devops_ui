@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border="true"
+      border
       fit
       highlight-current-row
       style="width: 100%"
@@ -73,7 +73,8 @@
       </el-table-column>
       <el-table-column label="有效" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.is_active }}</span>
+          <span v-if="row.is_active">是</span>
+          <span v-else>否</span>
         </template>
       </el-table-column>
       <el-table-column label="上次登录" width="auto" align="center">
@@ -186,22 +187,6 @@
         </el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
@@ -211,6 +196,7 @@ import {
   updateUser,
   deleteUser
 } from '@/api/user'
+import { checkPhone, checkSpecialKey } from '@/utils/validate'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -228,16 +214,10 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
         title: undefined,
         type: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
-      showReviewer: false,
       temp: {
         id: undefined,
         username: '',
@@ -253,29 +233,29 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         username: [
-          { required: true, message: 'username is required', trigger: 'change' }
+          { required: true, trigger: 'blur', message: '请填入用户名' },
+          { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
+          { validator: checkSpecialKey, message: '请不要填入特殊字符', trigger: 'blur' }
         ],
         name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+          { required: true, message: '请填入姓名', trigger: 'blur' }
         ],
         mobile: [
-          { required: true, message: 'mobile is required', trigger: 'blur' }
+          { required: true, trigger: 'blur', message: '请填入正确的电话号码' },
+          { validator: checkPhone, message: '请填入正确的电话号码', trigger: 'blur' }
         ],
         email: [
           { required: true, message: 'email is required', trigger: 'blur' }
         ],
         is_active: [
-          { required: true, message: 'is_active is required', trigger: 'blur' }
+          { required: true, message: '请填入是否有效', trigger: 'blur' }
         ],
         is_superuser: [
-          { required: true, message: 'is_superuser is required', trigger: 'blur' }
+          { required: true, message: '请填入是否是超管', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {
