@@ -8,16 +8,6 @@
       label-position="top"
       label-width="100px"
     >
-      <sticky :z-index="10" class-name="sub-navbar draft">
-        <el-button v-loading="loading" style="margin:10px 40px 0px 10px" type="success" @click="submitForm">
-          确认
-        </el-button>
-        <router-link to="/config/service" style="margin:10px 40px 0px 10px">
-          <el-button v-loading="loading" type="warning">
-            取消
-          </el-button>
-        </router-link>
-      </sticky>
       <div class="createPost-main-container">
         <el-row>
           <!-- <Warning /> -->
@@ -45,11 +35,11 @@
                   </el-form-item>
                 </el-col>
               </el-row>
-              <el-row v-if="postForm.service_ports_enable">
+              <el-row  v-if="postForm.service_ports_enable">
                 <!--                <el-col v-if="postForm.service_ports_enable" :span="10" style="margin-bottom: 40px;">-->
                 <div v-for="(port,index) in postForm.service_ports" :key="index">
-                  <el-row>
-                    <el-col :span="5" style="margin-right: 20px">
+                  <el-row type="flex" align="middle">
+                    <el-col  :span="5" style="margin-right: 20px">
                       <el-form-item
                         :key="port.id"
                         :label="'端口名称：' + index"
@@ -90,8 +80,13 @@
                       </el-form-item>
                     </el-col>
                     <el-col :span="2">
+                      <el-form-item
+                        :key="index+'s'"
+                        :label="` \u00a0`"
+                      >
                       <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removePort(port)">删除
                       </el-button>
+                      </el-form-item>
                     </el-col>
                   </el-row>
                 </div>
@@ -211,9 +206,15 @@
                       </el-form-item>
                     </el-col>
                     <el-col :span="2">
+                      <el-form-item
+                        :key="index+'s'"
+                        :label="` \u00a0`"
+                      >
                       <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removeEnv(env)">删除
                       </el-button>
+                      </el-form-item>
                     </el-col>
+
                   </el-row>
                   <el-divider content-position="center">环境变量配置</el-divider>
                 </div>
@@ -596,13 +597,14 @@
                     prop="service_domain.hosts"
                     :rules="[{required: true, message: '是否启用域名不能为空', trigger: 'blur'}]"
                   >
-                    <el-input
-                      v-model="postForm.service_domain.hosts"
-                      class="filter-item"
-                      size="medium"
-                      placeholder="域名配置信息"
-                      type="textarea"
-                    />
+                    <CodeEditor style="min-height:300px" :showChangemode="false" :editorValue.sync="postForm.service_domain.hosts"></CodeEditor>
+<!--                    <el-input-->
+<!--                      v-model="postForm.service_domain.hosts"-->
+<!--                      class="filter-item"-->
+<!--                      size="medium"-->
+<!--                      placeholder="域名配置信息"-->
+<!--                      type="textarea"-->
+<!--                    />-->
                   </el-form-item>
                 </el-col>
                 <el-col :span="11" style="margin-right: 20px">
@@ -661,6 +663,16 @@
           </el-col>
         </el-row>
       </div>
+      <sticky :z-index="10" class-name="draft" style="float:right">
+        <el-button v-loading="loading" style="margin:10px 40px 0 10px" type="success" @click="submitForm">
+          确认
+        </el-button>
+        <router-link to="/config/service" style="margin:10px 40px 0 10px">
+          <el-button v-loading="loading" type="warning">
+            取消
+          </el-button>
+        </router-link>
+      </sticky>
     </el-form>
   </div>
 </template>
@@ -675,7 +687,7 @@ import {
   getServiceConfigList
 } from '@/api/service'
 import { checkSpecialKey } from '@/utils/validate'
-
+import CodeEditor from  '@/components/CodeEditor/index.vue'
 const defaultForm = {
   id: undefined,
   service_name: '',
@@ -700,7 +712,7 @@ const defaultForm = {
 
 export default {
   name: 'DetailPage',
-  components: { MDinput, Sticky },
+  components: { MDinput, Sticky,CodeEditor },
   props: {
     isEdit: {
       type: Boolean,
@@ -953,7 +965,9 @@ padding: 2px;
 
 .createPost-container {
   position: relative;
-
+  .el-input-number{
+    width:100%
+  }
   .createPost-main-container {
     padding: 40px 45px 20px 50px;
 

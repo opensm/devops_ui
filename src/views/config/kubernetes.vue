@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <sticky :z-index="10" class="btn-box" class-name="sub-navbar draft">
+    <sticky :z-index="10" class="btn-box" class-name=" draft">
       <router-link to="/config/kubernets_create">
         <el-button v-loading="listLoading" style="margin-left: 10px;" type="success">
           创建配置
@@ -148,16 +148,8 @@ export default {
 
 <style scoped>
 .btn-box{
-  text-align:right;
-  padding-left:5%;
+  text-align:left;
+  /*padding-left:5%;*/
   margin-bottom: 1%;
-}
-.edit-input {
-  padding-right: 100px;
-}
-.cancel-btn {
-  position: absolute;
-  right: 15px;
-  top: 10px;
 }
 </style>

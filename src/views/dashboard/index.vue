@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <div class="dashboard-text">name: {{ name }} {{ publickey }}</div>
+    <div class="dashboard-text">name: {{ names }} {{ publickey }}</div>
   </div>
 </template>
 

@@ -1,6 +1,6 @@
 <template>
   <div class="in-coder-panel">
-    <el-select v-model="cmMode" class="code-mode-select" @change="changeMode">
+    <el-select v-model="cmMode" v-if="showChangemode" class="code-mode-select" @change="changeMode">
       <!-- <el-select v-model="cmMode" class="code-mode-select"> -->
       <el-option v-for="ssss in modes" :key="ssss.value" :label="ssss.label" :value="ssss.value" />
     </el-select>
@@ -148,6 +148,10 @@ export default {
       type: String,
       default: '3024-night'
     },
+    showChangemode:{
+      type: Boolean,
+      default: true
+    },
     editorValue: {
       type: String,
       default: 'yaml'
@@ -274,7 +278,7 @@ export default {
         return currentLabel === currentLanguage || currentValue === currentLanguage
       })
     },
-    onCmCodeChanges(cm, changes) {
+    onCmCodeChanges(cm) {
       this.editorValue1 = cm.getValue()
       this.$emit('update:editorValue', this.editorValue1)
       this.resetLint()
@@ -301,12 +305,13 @@ export default {
       )
     },
     // 失去焦点时处理函数
-    onCmBlur(cm, event) {
+    onCmBlur(cm) {
       try {
         this.resetLint()
         const editorValue = cm.getValue()
         if (editorValue === null) {
-          throw new Error('数据未添加！')
+          // throw new Error('数据未添加！')
+          return
         }
         if (this.cmOptions.mode === 'application/json') {
           if (!this.enableAutoFormatJson) {
@@ -332,11 +337,11 @@ export default {
       }
     },
     // 按下鼠标时事件处理函数
-    onMouseDown(event) {
+    onMouseDown() {
       this.$refs.myCm.codemirror.closeHint()
     },
     // 黏贴事件处理函数
-    OnPaste(event) {
+    OnPaste() {
       if (this.cmOptions.mode === 'application/json') {
         try {
           this.editorValue1 = this.formatStrInJson(this.editorValue1)

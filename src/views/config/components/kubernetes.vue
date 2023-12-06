@@ -45,7 +45,7 @@
           <span v-show="contentShortLength" class="word-counter">{{ contentShortLength }}个字符</span>
         </el-form-item>
       </div>
-      <sticky :z-index="10" class="btn-box" class-name="sub-navbar draft">
+      <sticky :z-index="10" class="btn-box">
         <el-button v-loading="loading" style="margin-right: 10px;" type="success" @click="submitForm">
           确认
         </el-button>
@@ -232,7 +232,7 @@ export default {
       width: 80px;
       position: absolute;
       right: 10px;
-      top: 0px;
+      top: 0;
     }
   }
 
@@ -241,7 +241,7 @@ export default {
       padding-right: 40px;
       resize: none;
       border: none;
-      border-radius: 0px;
+      border-radius: 0;
       border-bottom: 1px solid #bfcbd9;
     }
   }

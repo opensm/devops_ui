@@ -1,17 +1,6 @@
 <template>
   <div class="createPost-container">
     <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container" label-position="top" label-width="100px">
-      <sticky :z-index="10" class-name="sub-navbar draft">
-        <el-button v-loading="loading" style="margin:10px 40px 0px 10px" type="success" @click="submitForm">
-          确认
-        </el-button>
-        <router-link to="/config/service_config" style="margin:10px 40px 0px 10px">
-          <el-button v-loading="loading" type="warning">
-            取消
-          </el-button>
-        </router-link>
-      </sticky>
-
       <div class="createPost-main-container">
         <el-row>
           <!-- <Warning /> -->
@@ -91,11 +80,11 @@
                 :value="item"
               />
             </el-select>
-            <el-button v-if="isEdit" type="primary" size="small" style="margin-left:10x;width:150px" @click="getValue">获取内容</el-button>
+            <el-button v-if="isEdit" type="primary" size="small" style="margin-left:10px;width:150px" @click="getValue">获取内容</el-button>
           </div>
-          <code-mirror-editor
+          <CodeMirrorEditor
             ref="cmEditor"
-            :cm-theme="cmTheme"
+            :cmTheme="cmTheme"
             :cm-mode="cmMode"
             :auto-format-json="autoFormatJson"
             :json-indentation="jsonIndentation"
@@ -104,6 +93,16 @@
           <!--          </div>-->
         </el-form-item>
       </div>
+      <sticky :z-index="10" class-name="draft" style="float:right">
+        <el-button v-loading="loading" style="margin:10px 40px 0 10px" type="success" @click="submitForm">
+          确认
+        </el-button>
+        <router-link to="/config/service_config" style="margin:10px 40px 0 10px">
+          <el-button v-loading="loading" type="warning">
+            取消
+          </el-button>
+        </router-link>
+      </sticky>
     </el-form>
   </div>
 </template>
