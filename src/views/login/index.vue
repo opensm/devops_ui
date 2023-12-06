@@ -55,15 +55,26 @@
 <script>
 import { publicKey } from '@/api/user'
 import { enSecret } from '@/utils/secret'
-import { checkSpecialKey } from '@/utils/validate'
+import {checkPassword, checkSpecialKey} from '@/utils/validate'
 
 export default {
   name: 'Login',
   data() {
+    const validateUsername = (rule, value, callback) => {
+      if (!checkSpecialKey(value)) {
+        callback(new Error('请不要填入特殊字符'))
+      } else  {
+        callback()
+      }
+    }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
         callback(new Error('The password can not be less than 6 digits'))
-      } else {
+      }
+      // else if (checkPassword(value)) {
+      //   callback(new Error('密码填写错误，请填写6-20位，不包含中文至少包含一位数字字符和大小写字母'))
+      // }
+      else {
         callback()
       }
     }
@@ -78,7 +89,7 @@ export default {
         username: [
           { required: true, trigger: 'blur', message: '请填入用户名' },
           { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
-          { validator: checkSpecialKey, message: '请不要填入特殊字符', trigger: 'blur' }
+          { validator: validateUsername, message: '请不要填入特殊字符', trigger: 'blur' }
         ],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
@@ -116,10 +127,11 @@ export default {
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
+        console.log(valid)
         if (valid) {
           this.loading = true
-          // const tmp_password = this.password
-          const tmp_password = enSecret(this.loginForm.password, this.publicKey)
+          const tmp_password = this.password
+          // this.loginForm.password = enSecret(this.loginForm.password, this.publicKey)
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/dashboard' })
             this.loading = false

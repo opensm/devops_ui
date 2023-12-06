@@ -138,6 +138,13 @@ export default {
     }
   },
   data() {
+    const validateServiceName = (rule, value, callback) => {
+      if (!checkSpecialKey(value)) {
+        callback(new Error('请不要填入特殊字符'))
+      } else  {
+        callback()
+      }
+    }
     return {
       cmTheme: 'material-darker',
       cmMode: 'yaml',
@@ -149,7 +156,7 @@ export default {
           { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
           // { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号', trigger: 'blur' },
           { pattern: /[0-9a-zA-Z]{1,10}/, message: '只可以输入数字和字母和中横杠', trigger: 'blur' },
-          { validator: checkSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
+          { validator: validateServiceName, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
         ],
         content: [
           { required: true, message: '配置内容必须填写', trigger: 'blur' }

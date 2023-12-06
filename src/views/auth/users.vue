@@ -206,6 +206,20 @@ export default {
   },
   directives: { waves },
   data() {
+    const validateUsername = (rule, value, callback) => {
+      if (!checkSpecialKey(value)) {
+        callback(new Error('请不要填入特殊字符'))
+      } else  {
+        callback()
+      }
+    }
+    const validatePhone = (rule, value, callback) => {
+      if (!checkPhone(value)) {
+        callback(new Error('请输入正确的手机号码'))
+      } else  {
+        callback()
+      }
+    }
     return {
       tableKey: 0,
       list: null,
@@ -237,14 +251,14 @@ export default {
         username: [
           { required: true, trigger: 'blur', message: '请填入用户名' },
           { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
-          { validator: checkSpecialKey, message: '请不要填入特殊字符', trigger: 'blur' }
+          { validator: validateUsername, message: '请不要填入特殊字符', trigger: 'blur' }
         ],
         name: [
           { required: true, message: '请填入姓名', trigger: 'blur' }
         ],
         mobile: [
           { required: true, trigger: 'blur', message: '请填入正确的电话号码' },
-          { validator: checkPhone, message: '请填入正确的电话号码', trigger: 'blur' }
+          { validator: validatePhone, message: '请填入正确的电话号码', trigger: 'blur' }
         ],
         email: [
           { required: true, message: 'email is required', trigger: 'blur' }

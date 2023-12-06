@@ -708,6 +708,13 @@ export default {
     }
   },
   data() {
+    const validateServiceName = (rule, value, callback) => {
+      if (!checkSpecialKey(value)) {
+        callback(new Error('请不要填入特殊字符'))
+      } else  {
+        callback()
+      }
+    }
     return {
       configList: [],
       service_healthy_type: 'tcp',
@@ -719,7 +726,7 @@ export default {
         service_name: [
           { required: true, message: 'service_name is required', trigger: 'blur' },
           { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
-          { validator: checkSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
+          { validator: validateServiceName, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
         ],
         // service_ports: [{required: true, message: 'service_ports is required', trigger: 'blur'}],
         service_ports_enable: [
