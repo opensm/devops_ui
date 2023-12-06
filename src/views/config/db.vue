@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border="true"
+      :border="true"
       fit
       highlight-current-row
       style="width: 100%"

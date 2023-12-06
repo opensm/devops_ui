@@ -71,7 +71,7 @@
           <span>{{ row.service_config }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="是否部署在k8s" width="auto" align="center">
+      <el-table-column label="是否部署在k8s" width="150px" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.kubernetes_enable }}</span>
         </template>
@@ -81,12 +81,12 @@
           <span>{{ row.kubernetes_environment_config }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="是否部署在docker" width="auto" align="center">
+      <el-table-column label="是否部署在docker" width="150px" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.docker_enable }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="关联docker配置" width="auto" align="center">
+      <el-table-column label="关联docker配置" width="150px" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.docker_environment_config }}</span>
         </template>
@@ -104,7 +104,7 @@
       <el-table-column
         label="操作"
         align="center"
-        width="400px"
+        width="150px"
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row, $index }">
@@ -151,7 +151,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="资源" prop="resource">
-          <el-select v-model="temp.resource" style="width: 230%">
+          <el-select v-model="temp.resource">
             <el-option :value="resource.id"  v-for="(resource,index) in selectList5" :key="resource.id" :label="'Request CPU:' + resource.request_cpu + 'm, Request Memory:' + resource.request_memory + 'GB, Limit CPU:' + resource.limit_cpu + 'm, Limit Memory:' + resource.limit_memory + 'GB'">
               Request CPU:{{ resource.request_cpu }}m, Request Memory:{{ resource.request_memory }}GB, Limit CPU:{{ resource.limit_cpu }}m, Limit Memory:{{ resource.limit_memory }}GB
             </el-option>

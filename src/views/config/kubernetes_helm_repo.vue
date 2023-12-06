@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border="true"
+      :border="true"
       fit
       highlight-current-row
       style="width: 100%"
@@ -96,7 +96,7 @@
         :rules="rules"
         :model="temp"
         label-position="left"
-        label-width="120px"
+        label-width="190px"
         style="width: 400px; margin-left: 50px"
       >
         <el-form-item label="helm repo配置命令" prop="helm_repo_add_command">

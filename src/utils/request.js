@@ -80,11 +80,11 @@ service.interceptors.response.use(
       }
       return Promise.reject(new Error('登录失败，请检查！' || 'Error'))
     } else {
-      Message({
-        message: message || '操作成功！',
-        type: 'success',
-        duration: 5 * 1000
-      })
+      // Message({
+      //   message: message || '操作成功！',
+      //   type: 'success',
+      //   duration: 5 * 1000
+      // })
       // console.log(res)
       return res
     }

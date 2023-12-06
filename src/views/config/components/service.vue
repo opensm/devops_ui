@@ -968,6 +968,9 @@ padding: 2px;
   .el-input-number{
     width:100%
   }
+  .el-select{
+    width:100%
+  }
   .createPost-main-container {
     padding: 40px 45px 20px 50px;
 

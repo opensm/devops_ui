@@ -305,7 +305,7 @@ export default {
 .tinymce-container {
   position: relative;
   line-height: normal;
-  min-height:600px;
+  /*min-height:600px;*/
 }
 
 </style>

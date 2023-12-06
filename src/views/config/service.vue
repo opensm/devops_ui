@@ -78,7 +78,7 @@
           <span>{{ row.service_compile }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="默认环境变量列表" width="auto" align="center">
+      <el-table-column label="默认环境变量列表" width="150px" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.service_environment }}</span>
         </template>
@@ -98,7 +98,7 @@
           <span>{{ row.service_prometheus_enable }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="配置对外域名启用" width="auto" align="center">
+      <el-table-column label="配置对外域名启用" width="150px" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.service_domain_enable }}</span>
         </template>
@@ -111,7 +111,7 @@
       <el-table-column
         label="操作"
         align="center"
-        width="400px"
+        width="150px"
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row, $index }">
