@@ -35,6 +35,19 @@ module.exports = {
     overlay: {
       warnings: false,
       errors: true
+    },
+    proxy: {
+      // [process.env.VUE_APP_BASE_URL || '/gateway']: {
+      //   target: 'https://community-dev.community-mall.innet.dm.newcowin.com',
+      //   changeOrigin: true,
+      //   pathRewrite: {
+      //     [process.env.VUE_APP_BASE_URL || '/gateway']: ''
+      //   }
+      // },
+      '/': {
+        target: `http://10.52.30.36:8000/api`,
+        changeOrigin: true
+      }
     }
     // before: require('./mock/mock-server.js')
   },
