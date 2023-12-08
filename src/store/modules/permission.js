@@ -1,4 +1,9 @@
-import { asyncRoutes, constantRoutes } from '@/router'
+import {
+  asyncRoutes,
+  constantRoutes
+} from '@/router'
+import { getToken } from '@/utils/auth'
+import { jwtDecode } from 'jwt-decode'
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -47,9 +52,11 @@ const mutations = {
 }
 
 const actions = {
-  generateRoutes({ commit }, user_data) {
+  generateRoutes({ commit }) {
     return new Promise(resolve => {
       let accessedRoutes
+      const access = getToken()
+      const user_data = jwtDecode(access)
       const { is_superuser } = user_data
       if (is_superuser) {
         accessedRoutes = asyncRoutes || []

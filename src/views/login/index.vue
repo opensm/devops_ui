@@ -43,9 +43,6 @@
       <el-form-item prop="ldap">
         <el-switch v-model="loginForm.ldap" active-color="#13ce66" inactive-color="#ff4949" />
       </el-form-item>
-
-      <!-- <div class="tips"><el-switch v-model="loginForm.ldap" active-color="#13ce66" inactive-color="#ff4949" name="ldap"/></div> -->
-
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
 
     </el-form>
@@ -55,7 +52,7 @@
 <script>
 import { publicKey } from '@/api/user'
 import { enSecret } from '@/utils/secret'
-import {checkPassword, checkSpecialKey} from '@/utils/validate'
+import { checkSpecialKey } from '@/utils/validate'
 
 export default {
   name: 'Login',
@@ -63,7 +60,7 @@ export default {
     const validateUsername = (rule, value, callback) => {
       if (!checkSpecialKey(value)) {
         callback(new Error('请不要填入特殊字符'))
-      } else  {
+      } else {
         callback()
       }
     }
@@ -131,7 +128,7 @@ export default {
         if (valid) {
           this.loading = true
           const tmp_password = this.password
-          // this.loginForm.password = enSecret(this.loginForm.password, this.publicKey)
+          this.loginForm.password = enSecret(this.loginForm.password, this.publicKey)
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/dashboard' })
             this.loading = false

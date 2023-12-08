@@ -142,23 +142,23 @@
 
         <el-form-item label="关联服务" prop="service">
           <el-select v-model="temp.service" >
-            <el-option :value="svc.id" :label="svc.service_name" v-for="(svc,index) in selectList7" :key="svc.id"> {{ svc.service_name }}</el-option>
+            <el-option :value="svc.id" v-for="svc in selectList7" :label="svc.service_name" :key="svc.id"> {{ svc.service_name }}</el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="所属环境" prop="environment">
           <el-select v-model="temp.environment" >
-            <el-option :value="env.id" v-for="(env,index) in selectList4" :key="env.id" :label="env.environment"> {{ env.environment }}</el-option>
+            <el-option :value="env.id" v-for="env in selectList4" :key="env.id" :label="env.environment"> {{ env.environment }}</el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="资源" prop="resource">
           <el-select v-model="temp.resource">
-            <el-option :value="resource.id"  v-for="(resource,index) in selectList5" :key="resource.id" :label="'Request CPU:' + resource.request_cpu + 'm, Request Memory:' + resource.request_memory + 'GB, Limit CPU:' + resource.limit_cpu + 'm, Limit Memory:' + resource.limit_memory + 'GB'">
-              Request CPU:{{ resource.request_cpu }}m, Request Memory:{{ resource.request_memory }}GB, Limit CPU:{{ resource.limit_cpu }}m, Limit Memory:{{ resource.limit_memory }}GB
+            <el-option :value="resource.id"  v-for="resource in selectList5" :key="resource.id" :label="'需求 CPU:' + resource.request_cpu + 'm/内存:' + resource.request_memory + 'MB, 限制 CPU:' + resource.limit_cpu + 'm/内存:' + resource.limit_memory + 'MB'">
+              需求 CPU:{{ resource.request_cpu }}m/内存:{{ resource.request_memory }}MB, 限制 CPU:{{ resource.limit_cpu }}m/内存:{{ resource.limit_memory }}MB
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="配置文件" prop="service_config">
-          <el-select v-model="temp.service_config" v-for="(config,index) in selectList6" :key="config.id">
+          <el-select v-model="temp.service_config" v-for="config in selectList6" :key="config.id">
             <el-option :value="config.id" :label="config.service_name"> {{ config.service_name }}</el-option>
           </el-select>
         </el-form-item>
@@ -176,7 +176,7 @@
           <el-select v-model="temp.kubernetes_environment_config" >
             <el-option :value="config.id"
                        :label="config.kubernetes_namespace"
-                       v-for="(config,index) in selectList2"
+                       v-for="config in selectList2"
                        :key="config.id">
               {{ config.kubernetes_namespace }}
             </el-option>
@@ -193,7 +193,7 @@
           />
         </el-form-item>
         <el-form-item label="关联docker配置" prop="docker_environment_config" v-if="temp.docker_enable">
-          <el-select v-model="temp.docker_environment_config" v-for="(config,index) in selectList3" :key="config.id">
+          <el-select v-model="temp.docker_environment_config" v-for="config in selectList3" :key="config.id">
             <el-option :value="config.id" :label="config.docker_instances"> {{ config.docker_instances }}</el-option>
           </el-select>
         </el-form-item>
@@ -206,7 +206,7 @@
         </el-form-item>
         <el-form-item label="关联项目" prop="project">
           <el-select v-model="temp.project" >
-            <el-option :value="config.id" :label="config.name" v-for="(config,index) in selectList1" :key="config.id"> {{ config.name }}</el-option>
+            <el-option :value="config.id" :label="config.name" v-for="config in selectList1" :key="config.id"> {{ config.name }}</el-option>
           </el-select>
         </el-form-item>
         <el-form-item label=自动部署？ prop="auto_deploy">
@@ -510,3 +510,8 @@ export default {
   }
 }
 </script>
+<style>
+.el-select {
+  width: 100%;
+}
+</style>

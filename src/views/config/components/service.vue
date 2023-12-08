@@ -10,15 +10,13 @@
     >
       <div class="createPost-main-container">
         <el-row>
-          <!-- <Warning /> -->
-          {{ postForm }}
-
           <el-col :span="24">
             <el-form-item style="margin-bottom: 80px;" prop="service_name">
               <MDinput v-model="postForm.service_name" :maxlength="100" name="service_name" required>
                 服务名称
               </MDinput>
             </el-form-item>
+            {{ postForm }}
 
             <div class="postInfo-container">
               <el-row>
@@ -35,16 +33,15 @@
                   </el-form-item>
                 </el-col>
               </el-row>
-              <el-row  v-if="postForm.service_ports_enable">
-                <!--                <el-col v-if="postForm.service_ports_enable" :span="10" style="margin-bottom: 40px;">-->
+              <el-row v-if="postForm.service_ports_enable">
                 <div v-for="(port,index) in postForm.service_ports" :key="index">
                   <el-row type="flex" align="middle">
-                    <el-col  :span="5" style="margin-right: 20px">
+                    <el-col :span="5" style="margin-right: 20px">
                       <el-form-item
                         :key="port.id"
                         :label="'端口名称：' + index"
                         :prop="'service_ports.' + index + '.name'"
-                        :rules="[{ required: true, message: '端口名称不能为空', trigger: 'blur' }, { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' }, { validator: checkSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }]"
+                        :rules="[{ required: true, message: '端口名称不能为空', trigger: 'blur' }, { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' }, { validator: validateServiceName, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }]"
                       >
                         <el-input v-model="port.name" />
                       </el-form-item>
@@ -84,8 +81,7 @@
                         :key="index+'s'"
                         :label="` \u00a0`"
                       >
-                      <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removePort(port)">删除
-                      </el-button>
+                        <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removePort(port)">删除</el-button>
                       </el-form-item>
                     </el-col>
                   </el-row>
@@ -113,6 +109,8 @@
                     <el-select
                       v-model="postForm.service_config"
                       clearable
+                      multiple
+                      multiple-limit="3"
                     >
                       <el-option
                         v-for="(config,index) in configList"
@@ -210,11 +208,9 @@
                         :key="index+'s'"
                         :label="` \u00a0`"
                       >
-                      <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removeEnv(env)">删除
-                      </el-button>
+                        <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removeEnv(env)">删除</el-button>
                       </el-form-item>
                     </el-col>
-
                   </el-row>
                   <el-divider content-position="center">环境变量配置</el-divider>
                 </div>
@@ -597,14 +593,7 @@
                     prop="service_domain.hosts"
                     :rules="[{required: true, message: '是否启用域名不能为空', trigger: 'blur'}]"
                   >
-                    <CodeEditor style="min-height:300px" :showChangemode="false" :editorValue.sync="postForm.service_domain.hosts"></CodeEditor>
-<!--                    <el-input-->
-<!--                      v-model="postForm.service_domain.hosts"-->
-<!--                      class="filter-item"-->
-<!--                      size="medium"-->
-<!--                      placeholder="域名配置信息"-->
-<!--                      type="textarea"-->
-<!--                    />-->
+                    <CodeEditor style="min-height:300px" :showChangemode="false" :editorValue.sync="postForm.service_domain.hosts" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="11" style="margin-right: 20px">
@@ -687,7 +676,7 @@ import {
   getServiceConfigList
 } from '@/api/service'
 import { checkSpecialKey } from '@/utils/validate'
-import CodeEditor from  '@/components/CodeEditor/index.vue'
+import CodeEditor from '@/components/CodeEditor/index.vue'
 const defaultForm = {
   id: undefined,
   service_name: '',
@@ -712,7 +701,7 @@ const defaultForm = {
 
 export default {
   name: 'DetailPage',
-  components: { MDinput, Sticky,CodeEditor },
+  components: { MDinput, Sticky, CodeEditor },
   props: {
     isEdit: {
       type: Boolean,
@@ -723,7 +712,7 @@ export default {
     const validateServiceName = (rule, value, callback) => {
       if (!checkSpecialKey(value)) {
         callback(new Error('请不要填入特殊字符'))
-      } else  {
+      } else {
         callback()
       }
     }
