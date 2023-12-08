@@ -88,7 +88,7 @@
             :cm-mode="cmMode"
             :auto-format-json="autoFormatJson"
             :json-indentation="jsonIndentation"
-            @update:editorValue="postForm.content = $event"
+            :editorValues.sync="postForm.content"
           />
           <!--          </div>-->
         </el-form-item>
@@ -270,6 +270,7 @@ export default {
     fetchData(id) {
       getServiceConfig(id).then(response => {
         this.postForm = response.data
+        console.log('!!!!'+this.postForm.content)
         // set tagsview title
         // this.setTagsViewTitle()
 

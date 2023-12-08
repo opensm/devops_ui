@@ -79,6 +79,10 @@ export default {
       type: String,
       default: '3024-night'
     },
+    editorValues:{
+      type: String,
+      default: ''
+    },
     cmMode: {
       type: String,
       default: 'yaml'
@@ -155,6 +159,15 @@ export default {
       this.$set(this.cmOptions, 'mode', this.cmMode)
       this.resetLint()
       this.resetFoldGutter()
+    },
+    editorValues:function(val){
+      this.editorValue=val
+      let post1=this.$refs.myCm.codemirror.getCursor();
+      let pos2={
+        line:post1.line,  //行号
+        ch:post1.ch //光标位置
+      }
+      this.$refs.myCm.codemirror.replaceRange(val,pos2)  //替换内容
     }
   },
   created() {
@@ -284,7 +297,7 @@ export default {
     },
     onCmCodeChanges(cm) {
       this.editorValue = cm.getValue()
-      this.$emit('update:editorValue', this.editorValue)
+      this.$emit('update:editorValues', this.editorValue)
       this.resetLint()
     },
     // 格式化字符串为json格式字符串

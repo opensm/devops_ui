@@ -29,7 +29,6 @@
       </el-button> -->
       <router-link to="/config/service_config_create">
         <el-button
-          v-loading="listLoading"
           class="filter-item"
           style="margin-left: 10px"
           type="primary"
