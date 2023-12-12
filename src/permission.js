@@ -27,25 +27,28 @@ router.beforeEach(async(to, from, next) => {
     } else {
       // determine whether the user has obtained his permission roles through getInfo
       const hasRoles = store.getters.roles
-      if (hasRoles) {
+      const hasKey = store.getters.publickey
+      if (hasRoles && hasKey) {
         next()
       } else {
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
           const user_data = await store.dispatch('user/getInfo')
+          // console.log(user_data)
 
           // generate accessible routes map based on roles
           const accessRoutes = await store.dispatch('permission/generateRoutes')
 
           // dynamically add accessible routes
+          console.log(accessRoutes)
           router.addRoutes(accessRoutes)
 
           // hack method to ensure that addRoutes is complete
           // set the replace: true, so the navigation will not leave a history record
           next()
         } catch (error) {
-          console.log("异常并重置登录")
+          console.log('异常并重置登录')
           // remove token and go to login page to re-login
           await store.dispatch('user/resetToken')
           Message.error(error || 'Has Error')

@@ -9,7 +9,8 @@ const getDefaultState = () => {
     name: '',
     roles: '',
     avatar: '',
-    publickey: ''
+    publickey: '',
+    userid: ''
   }
 }
 
@@ -18,6 +19,9 @@ const state = getDefaultState()
 const mutations = {
   RESET_STATE: (state) => {
     Object.assign(state, getDefaultState())
+  },
+  SET_ID: (state, userid) => {
+    state.userid = userid
   },
   SET_TOKEN: (state, token) => {
     state.token = token
@@ -64,12 +68,14 @@ const actions = {
       const public_key = getPubicKey()
       const access = getToken()
       const data = jwtDecode(access)
-      const { name } = data
+      const { name, user_id, roles } = data
       commit('SET_TOKEN', `Bearer ${access}`)
       commit('SET_PUBLICKEY', public_key)
+      commit('SET_ID', user_id)
       commit('SET_NAME', name)
       commit('SET_AVATAR', 'https://pic1.zhimg.com/80/v2-d327ca21ec78d29675b0b500607e2440_720w.webp')
-      commit('SET_ROLES', ['admin'])
+      commit('SET_ROLES', roles)
+      // commit('SET_ROLES', ['admin'])
       resolve(data)
     })
   },

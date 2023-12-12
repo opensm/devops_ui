@@ -121,8 +121,9 @@
             </el-button>
           </router-link>
           <el-button
-            size="mini"
+            size="medium"
             type="danger"
+            icon="el-icon-delete"
             @click="handleDelete(row, $index)"
           >
             删除
@@ -142,8 +143,6 @@
 <script>
 import {
   getServiceList,
-  createService,
-  updateService,
   deleteService
 } from '@/api/service'
 import waves from '@/directive/waves' // waves directive
@@ -159,7 +158,7 @@ export default {
     const validateServiceName = (rule, value, callback) => {
       if (!checkSpecialKey(value)) {
         callback(new Error('请不要填入特殊字符'))
-      } else  {
+      } else {
         callback()
       }
     }

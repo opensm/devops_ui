@@ -29,6 +29,10 @@ export function filterAsyncRoutes(routes, roles) {
   routes.forEach(route => {
     const tmp = { ...route }
     if (hasPermission(roles, tmp)) {
+      console.log('当前有权限+')
+      console.log(tmp)
+      console.log(roles)
+      console.log('当前有权限-')
       if (tmp.children) {
         tmp.children = filterAsyncRoutes(tmp.children, roles)
       }
@@ -57,11 +61,12 @@ const actions = {
       let accessedRoutes
       const access = getToken()
       const user_data = jwtDecode(access)
-      const { is_superuser } = user_data
+      const { is_superuser, roles } = user_data
       if (is_superuser) {
         accessedRoutes = asyncRoutes || []
       } else {
-        accessedRoutes = filterAsyncRoutes(asyncRoutes, user_data)
+        accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
+        // accessedRoutes = filterAsyncRoutes(asyncRoutes, user_data)
       }
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)

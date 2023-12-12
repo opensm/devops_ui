@@ -2,8 +2,8 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input
-        v-model="listQuery.name"
-        placeholder="Title"
+        v-model="listQuery.ssh_name"
+        placeholder="名称"
         style="width: 200px"
         class="filter-item"
         @keyup.enter.native="handleFilter"
@@ -77,7 +77,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -113,8 +112,8 @@
         </el-form-item>
         <el-form-item label="认证方式" prop="ssh_type">
           <el-radio-group v-model="temp.ssh_type">
-            <el-radio-button label="password">密码</el-radio-button>
-            <el-radio-button label="publickey">密钥</el-radio-button>
+            <el-radio-button label="password" />
+            <el-radio-button label="publickey" />
           </el-radio-group>
         </el-form-item>
         <el-form-item label="用户" prop="ssh_username">
@@ -124,14 +123,14 @@
             placeholder="用户"
           />
         </el-form-item>
-        <el-form-item v-if="temp.ssh_type == 'password'" label="密码" prop="ssh_password">
+        <el-form-item v-if="temp.ssh_type === 'password'" label="密码" prop="ssh_password">
           <el-input
             v-model="temp.ssh_password"
             class="filter-item"
             placeholder="密码"
           />
         </el-form-item>
-        <el-form-item v-if="temp.ssh_type =='publickey'" prop="ssh_public_key" label="SSH公钥">
+        <el-form-item v-if="temp.ssh_type === 'publickey'" prop="ssh_public_key" label="SSH公钥">
           <el-input
             v-model="temp.ssh_public_key"
             class="filter-item"
@@ -162,6 +161,7 @@ import {
 } from '@/api/sshkey'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
+import { checkSpecialKey } from '@/utils/validate'
 export default {
   name: 'ComplexTable',
   components: {
@@ -169,6 +169,13 @@ export default {
   },
   directives: { waves },
   data() {
+    const validateSpecialKey = (rule, value, callback) => {
+      if (!checkSpecialKey(value)) {
+        callback(new Error('请不要填入特殊字符'))
+      } else {
+        callback()
+      }
+    }
     return {
       tableKey: 0,
       list: null,
@@ -177,16 +184,9 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
+        ssh_name: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
-      showReviewer: false,
       temp: {
         id: undefined,
         ssh_name: '',
@@ -201,26 +201,25 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         ssh_name: [
-          { required: true, message: 'ssh_name is required', trigger: 'blur' }
+          { required: true, message: '请填写配置名称', trigger: 'blur' },
+          { validator: validateSpecialKey, message: '请不要填写特殊字符', trigger: 'blur' }
         ],
         ssh_type: [
-          { required: true, message: 'ssh_type is required', trigger: 'blur' }
+          { required: true, message: '请填写配置类型', trigger: 'blur' }
         ],
         ssh_username: [
-          { required: true, message: 'ssh_username is required', trigger: 'blur' }
+          { required: true, message: 'SSH用户名必须填写 is required', trigger: 'blur' },
+          { validator: validateSpecialKey, message: '请不要填写特殊字符', trigger: 'blur' }
         ],
         ssh_password: [
-          { required: true, message: 'ssh_password is required', trigger: 'blur' }
+          { required: true, message: 'SSH密码必须填写', trigger: 'blur' }
         ],
         ssh_public_key: [
-          { required: true, message: 'ssh_public_key is required', trigger: 'blur' }
+          { required: true, message: 'SSH公钥必须填写', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {
@@ -271,7 +270,7 @@ export default {
       this.temp = {
         id: undefined,
         ssh_name: '',
-        ssh_type: '',
+        ssh_type: 'password',
         ssh_username: '',
         ssh_password: '',
         ssh_public_key: ''

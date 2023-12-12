@@ -56,3 +56,26 @@ export function deleteUser(id) {
     method: 'delete'
   })
 }
+
+export function checkPasswdUser(data) {
+  return request({
+    url: `/auth/userpass_check`,
+    method: 'post',
+    data
+  })
+}
+export function AdminPasswdUser(id, data) {
+  return request({
+    url: `/auth/adminpass/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function passwdUser(data) {
+  return request({
+    url: `/auth/userpass`,
+    method: 'put',
+    data
+  })
+}

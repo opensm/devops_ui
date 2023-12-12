@@ -270,7 +270,7 @@ export default {
     fetchData(id) {
       getServiceConfig(id).then(response => {
         this.postForm = response.data
-        console.log('!!!!'+this.postForm.content)
+        console.log('!!!!' + this.postForm.content)
         // set tagsview title
         // this.setTagsViewTitle()
 

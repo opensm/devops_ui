@@ -83,7 +83,7 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
         width="400px"
         class-name="small-padding fixed-width"
@@ -93,15 +93,13 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'published'"
             size="mini"
             type="success"
-            @click="handleModifyStatus(row, 'published')"
+            @click="handlePassword(row)"
           >
             修改密码
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -131,6 +129,7 @@
         <el-form-item label="用户名" prop="username">
           <el-input
             v-model="temp.username"
+            :disabled="dialogStatus === 'update'"
             class="filter-item"
             placeholder="用户名"
           />
@@ -176,12 +175,54 @@
             inactive-text="否"
           />
         </el-form-item>
+        <el-form-item v-if="!temp.is_superuser" label="关联角色" prop="roles">
+          <el-select
+            v-model="temp.roles"
+            class="filter-item"
+            placeholder="关联角色"
+            size="medium"
+          >
+            <el-option
+              v-for="item in roleSelect"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false"> 取消 </el-button>
         <el-button
           type="primary"
           @click="dialogStatus === 'create' ? createData() : updateData()"
+        >
+          确认
+        </el-button>
+      </div>
+    </el-dialog>
+    <el-dialog title="修改密码" :visible.sync="dialogPasswordFormVisible">
+      <el-form
+        ref="dataPassForm"
+        :rules="passwordRules"
+        :model="change"
+        label-position="left"
+        label-width="120px"
+        style="width: 400px; margin-left: 50px"
+      >
+        <el-form-item label="新密码" prop="password">
+          <el-input
+            v-model="change.password"
+            class="filter-item"
+            placeholder="新密码"
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogPasswordFormVisible = false"> 取消 </el-button>
+        <el-button
+          type="primary"
+          @click="updatePassword()"
         >
           确认
         </el-button>
@@ -194,11 +235,17 @@ import {
   getUsers,
   createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  AdminPasswdUser
 } from '@/api/user'
-import { checkPhone, checkSpecialKey } from '@/utils/validate'
+import { checkPassword, checkPhone, checkSpecialKey, checkEmail } from '@/utils/validate'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
+import { mapGetters } from 'vuex'
+import { enSecret } from '@/utils/secret'
+import store from '@/store'
+import { getRoleList } from '@/api/role'
+
 export default {
   name: 'ComplexTable',
   components: {
@@ -209,14 +256,30 @@ export default {
     const validateUsername = (rule, value, callback) => {
       if (!checkSpecialKey(value)) {
         callback(new Error('请不要填入特殊字符'))
-      } else  {
+      } else {
         callback()
       }
     }
     const validatePhone = (rule, value, callback) => {
       if (!checkPhone(value)) {
         callback(new Error('请输入正确的手机号码'))
-      } else  {
+      } else {
+        callback()
+      }
+    }
+    const validatePassword = (rule, value, callback) => {
+      if (value.length < 6) {
+        callback(new Error('密码长度不够，需要超过8位'))
+      } else if (!checkPassword(value)) {
+        callback(new Error('密码填写错误，请填写6-20位，不包含中文至少包含一位数字字符和大小写字母'))
+      } else {
+        callback()
+      }
+    }
+    const validateEmail = (rule, value, callback) => {
+      if (!checkEmail(value)) {
+        callback(new Error('请填写正确的邮箱地址'))
+      } else {
         callback()
       }
     }
@@ -232,20 +295,32 @@ export default {
         type: undefined,
         sort: '+id'
       },
+      roleSelect: [],
+      change: {
+        password: ''
+      },
       temp: {
         id: undefined,
         username: '',
         name: '',
         mobile: '',
         email: '',
-        is_active: '',
-        is_superuser: ''
+        is_active: false,
+        is_superuser: false,
+        roles: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
+      dialogPasswordFormVisible: false,
       textMap: {
         update: '修改',
         create: '新增'
+      },
+      passwordRules: {
+        password: [
+          { required: true, message: '新密码必须填写', trigger: 'blur' },
+          { required: true, trigger: 'blur', validator: validatePassword }
+        ]
       },
       rules: {
         username: [
@@ -261,19 +336,29 @@ export default {
           { validator: validatePhone, message: '请填入正确的电话号码', trigger: 'blur' }
         ],
         email: [
-          { required: true, message: 'email is required', trigger: 'blur' }
+          { required: true, message: '邮箱地址需要填写', trigger: 'blur' },
+          { validator: validateEmail, trigger: 'blur' }
         ],
         is_active: [
           { required: true, message: '请填入是否有效', trigger: 'blur' }
         ],
         is_superuser: [
-          { required: true, message: '请填入是否是超管', trigger: 'blur' }
+          { required: true, message: '需要选择超级用户？', trigger: 'blur' }
+        ],
+        roles: [
+          { required: true, message: '需要关联关联角色', trigger: 'blur' }
         ]
       }
     }
   },
+  computed: {
+    ...mapGetters([
+      'publickey'
+    ])
+  },
   created() {
     this.getList()
+    this.getRoles()
   },
   methods: {
     getList() {
@@ -287,16 +372,44 @@ export default {
         }, 1.5 * 1000)
       })
     },
+    getRoles() {
+      getRoleList().then(response => {
+        this.roleSelect = response.data
+      })
+    },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
     },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
+    handlePassword(row) {
+      this.temp = Object.assign({}, row)
+      this.dialogPasswordFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataPassForm'].clearValidate()
       })
-      row.status = status
+    },
+    updatePassword() {
+      this.$refs['dataPassForm'].validate((valid) => {
+        if (valid) {
+          const tempData = Object.assign({}, this.temp)
+          const tmp = this.change
+          this.change.password = enSecret(this.change.password, store.getters.publickey)
+          AdminPasswdUser(tempData.id, this.change).then(response => {
+            this.dialogPasswordFormVisible = false
+            const { message, code } = response
+            this.$notify({
+              title: '成功',
+              message: `修改成功： ${message},代码：${code}`,
+              type: 'success',
+              duration: 2000
+            })
+            this.change.password = ''
+          }).catch(() => {
+            this.change = tmp
+            this.loading = false
+          })
+        }
+      })
     },
     sortChange(data) {
       const { prop, order } = data
@@ -319,8 +432,8 @@ export default {
         name: '',
         mobile: '',
         email: '',
-        is_active: '',
-        is_superuser: ''
+        is_active: false,
+        is_superuser: false
       }
     },
     handleCreate() {
@@ -350,7 +463,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

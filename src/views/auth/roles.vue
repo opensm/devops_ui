@@ -28,7 +28,6 @@
         新增
       </el-button>
     </div>
-
     <el-table
       :key="tableKey"
       v-loading="listLoading"
@@ -39,6 +38,30 @@
       style="width: 100%"
       @sort-change="sortChange"
     >
+      <el-table-column type="expand">
+        <template slot-scope="{ row }">
+          <el-form
+            v-for="per in row.permission_child"
+            :key="per.id"
+            label-position="left"
+            inline
+            class="demo-table-expand"
+          >
+            <el-divider content-position="center">权限：{{ per.id }}</el-divider>
+            <el-form-item label="项目">
+              <span>{{ per.rw_project }}</span>
+            </el-form-item>
+            <el-form-item label="操作权限">
+              <span>{{ per.rw_permissions }}</span>
+            </el-form-item>
+            <el-form-item label="审核权限">
+              <span v-if="per.app_permissions">是</span>
+              <span v-else>否</span>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
+
       <el-table-column
         label="ID"
         prop="id"
@@ -56,14 +79,10 @@
           <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="权限" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.permission }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="是否是系统管理员" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.manager }}</span>
+          <span v-if="row.manager">是</span>
+          <span v-else>否</span>
         </template>
       </el-table-column>
       <el-table-column label="描述" width="auto" align="center">
@@ -82,15 +101,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row, 'published')"
-          >
-            修改密码
-          </el-button>
-          <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -135,7 +145,7 @@
             <el-option
               v-for="item in selectList"
               :key="item.id"
-              :label="item.project"
+              :label="'项目：' + item.rw_project + ',权限：' + item.rw_permissions"
               :value="item.id"
             />
           </el-select>
@@ -152,7 +162,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false"> 取消 </el-button>
+        <el-button @click="dialogFormVisible = false"> 取消</el-button>
         <el-button
           type="primary"
           @click="dialogStatus === 'create' ? createData() : updateData()"
@@ -160,22 +170,6 @@
           确认
         </el-button>
       </div>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
     </el-dialog>
   </div>
 </template>
@@ -189,6 +183,8 @@ import {
 import { getPermissionList } from '@/api/permission'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
+import { checkSpecialKey } from '@/utils/validate'
+
 export default {
   name: 'ComplexTable',
   components: {
@@ -196,6 +192,13 @@ export default {
   },
   directives: { waves },
   data() {
+    const validateSpecialKey = (rule, value, callback) => {
+      if (!checkSpecialKey(value)) {
+        callback(new Error('请不要填入特殊字符'))
+      } else {
+        callback()
+      }
+    }
     return {
       tableKey: 0,
       list: null,
@@ -210,11 +213,6 @@ export default {
         type: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
-      showReviewer: false,
       temp: {
         id: undefined,
         name: '',
@@ -227,20 +225,18 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+          { required: true, message: '角色名称必须填写', trigger: 'blur' },
+          { validator: validateSpecialKey, message: '请不要填写特殊字符', trigger: 'blur' }
         ],
         permission: [
-          { required: true, message: 'permission is required', trigger: 'blur' }
+          { required: true, message: '关联权限必须填写', trigger: 'blur' }
         ],
         manager: [
-          { required: true, message: 'manager is required', trigger: 'blur' }
+          { required: true, message: '是否是管理员', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {
@@ -268,13 +264,6 @@ export default {
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
-      row.status = status
     },
     sortChange(data) {
       const { prop, order } = data
@@ -325,7 +314,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -371,3 +359,20 @@ export default {
   }
 }
 </script>
+<style>
+.el-select {
+  width: 100%;
+}
+.demo-table-expand {
+  font-size: 0;
+}
+.demo-table-expand label {
+  width: 90px;
+  color: #99a9bf;
+}
+.demo-table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 30%;
+}
+</style>

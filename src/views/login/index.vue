@@ -52,8 +52,7 @@
 <script>
 import { publicKey } from '@/api/user'
 import { enSecret } from '@/utils/secret'
-import { checkSpecialKey } from '@/utils/validate'
-
+import { checkSpecialKey, checkPassword } from '@/utils/validate'
 export default {
   name: 'Login',
   data() {
@@ -68,9 +67,9 @@ export default {
       if (value.length < 6) {
         callback(new Error('The password can not be less than 6 digits'))
       }
-      // else if (checkPassword(value)) {
-      //   callback(new Error('密码填写错误，请填写6-20位，不包含中文至少包含一位数字字符和大小写字母'))
-      // }
+      else if (!checkPassword(value)) {
+        callback(new Error('密码填写错误，请填写6-32位，不包含中文至少包含一位数字字符和大小写字母'))
+      }
       else {
         callback()
       }

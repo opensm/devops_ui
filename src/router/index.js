@@ -26,35 +26,10 @@ import Layout from '@/layout'
  */
 
 /**
- * constantRoutes
- * a base page that does not have permission requirements
- * all roles can be accessed
+ * asyncRoutes
+ * the routes that need to be dynamically loaded based on user roles
  */
-export const constantRoutes = [
-  {
-    path: '/login',
-    component: () => import('@/views/login/index'),
-    hidden: true
-  },
-
-  {
-    path: '/404',
-    component: () => import('@/views/404'),
-    hidden: true
-  },
-
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/dashboard',
-    children: [{
-      path: 'dashboard',
-      name: '首页',
-      component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard' }
-    }]
-  },
-
+export const asyncRoutes = [
   {
     path: '/auth',
     component: Layout,
@@ -75,6 +50,13 @@ export const constantRoutes = [
           icon: 'user',
           roles: ['admin', 'manager']
         }
+      },
+      {
+        path: 'passwd',
+        component: () => import('@/views/auth/user_passwd'),
+        name: '密码修改',
+        meta: { title: '修改密码', noCache: true, activeMenu: '/auth/users' },
+        hidden: true
       },
       {
         path: 'role',
@@ -113,11 +95,10 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/config/environment',
     name: '配置中心',
-    roles: ['admin', 'manager'],
     meta: {
       title: '配置中心',
       icon: 'el-icon-s-cooperation',
-      roles: ['admin', 'manager']
+      roles: ['admin', 'manager', 'project-manager']
     },
     children: [
       {
@@ -127,7 +108,7 @@ export const constantRoutes = [
         meta: {
           title: '环境配置',
           icon: 'el-icon-discount',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -137,21 +118,31 @@ export const constantRoutes = [
         meta: {
           title: 'Kubernetes',
           icon: 'el-icon-bangzhu',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
         path: 'kubernets_edit/:id(\\d+)',
         component: () => import('@/views/config/kubernets_edit'),
         name: '编辑K8s配置',
-        meta: { title: '编辑K8s配置', noCache: true, activeMenu: '/config/kubernetes' },
+        meta: {
+          title: '编辑K8s配置',
+          noCache: true,
+          activeMenu: '/config/kubernetes',
+          roles: ['admin', 'manager', 'project-manager']
+        },
         hidden: true
       },
       {
         path: 'kubernets_create',
         component: () => import('@/views/config/kubernets_create'),
         name: '新增K8s配置',
-        meta: { title: '新增K8s配置', noCache: true, activeMenu: '/config/kubernetes' },
+        meta: {
+          title: '新增K8s配置',
+          noCache: true,
+          activeMenu: '/config/kubernetes',
+          roles: ['admin', 'manager', 'project-manager']
+        },
         hidden: true
       },
       {
@@ -161,7 +152,7 @@ export const constantRoutes = [
         meta: {
           title: 'SSH密钥',
           icon: 'el-icon-suitcase',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -171,21 +162,31 @@ export const constantRoutes = [
         meta: {
           title: '服务配置文件',
           icon: 'el-icon-suitcase-1',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
         path: 'service_config_edit/:id(\\d+)',
         component: () => import('@/views/config/service_config_edit'),
-        name: '编辑K8s配置',
-        meta: { title: '编辑K8s配置', noCache: true, activeMenu: '/config/service_config' },
+        name: '编辑服务配置',
+        meta: {
+          title: '编辑服务配置',
+          noCache: true,
+          activeMenu: '/config/service_config',
+          roles: ['admin', 'manager', 'project-manager']
+        },
         hidden: true
       },
       {
         path: 'service_config_create',
         component: () => import('@/views/config/service_config_create'),
-        name: '新增K8s配置',
-        meta: { title: '新增K8s配置', noCache: true, activeMenu: '/config/service_config' },
+        name: '新增服务配置',
+        meta: {
+          title: '新增服务配置',
+          noCache: true,
+          activeMenu: '/config/service_config',
+          roles: ['admin', 'manager', 'project-manager']
+        },
         hidden: true
       },
       {
@@ -195,21 +196,31 @@ export const constantRoutes = [
         meta: {
           title: '服务列表',
           icon: 'el-icon-notebook-2',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
         path: 'service_edit/:id(\\d+)',
         component: () => import('@/views/config/service_edit'),
-        name: '编辑K8s配置',
-        meta: { title: '编辑K8s配置', noCache: true, activeMenu: '/config/service' },
+        name: '编辑服务',
+        meta: {
+          title: '编辑服务',
+          noCache: true,
+          activeMenu: '/config/service',
+          roles: ['admin', 'manager', 'project-manager']
+        },
         hidden: true
       },
       {
         path: 'service_create',
         component: () => import('@/views/config/service_create'),
-        name: '新增K8s配置',
-        meta: { title: '新增K8s配置', noCache: true, activeMenu: '/config/service' },
+        name: '新增服务',
+        meta: {
+          title: '新增服务',
+          noCache: true,
+          activeMenu: '/config/service',
+          roles: ['admin', 'manager', 'project-manager']
+        },
         hidden: true
       },
       {
@@ -219,7 +230,7 @@ export const constantRoutes = [
         meta: {
           title: '服务资源',
           icon: 'el-icon-s-platform',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -229,7 +240,7 @@ export const constantRoutes = [
         meta: {
           title: '服务K8S环境配置',
           icon: 'el-icon-s-release',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -239,7 +250,7 @@ export const constantRoutes = [
         meta: {
           title: '服务docker环境配置',
           icon: 'el-icon-s-management',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -249,7 +260,7 @@ export const constantRoutes = [
         meta: {
           title: '服务部署配置',
           icon: 'el-icon-s-flag',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -259,7 +270,7 @@ export const constantRoutes = [
         meta: {
           title: 'HELM仓库',
           icon: 'table',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -269,7 +280,7 @@ export const constantRoutes = [
         meta: {
           title: 'HELM 模板',
           icon: 'el-icon-s-data',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -279,7 +290,7 @@ export const constantRoutes = [
         meta: {
           title: 'Docker制品',
           icon: 'el-icon-menu',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -289,7 +300,7 @@ export const constantRoutes = [
         meta: {
           title: '数据库配置',
           icon: 'el-icon-files',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       },
       {
@@ -299,7 +310,7 @@ export const constantRoutes = [
         meta: {
           title: '项目',
           icon: 'el-icon-pie-chart',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'project-manager']
         }
       }
     ]
@@ -307,27 +318,20 @@ export const constantRoutes = [
   {
     path: '/verify',
     component: Layout,
+    meta: {
+      title: '工单审核',
+      icon: 'form',
+      roles: ['admin', 'project-approve']
+    },
     children: [
       {
         path: 'index',
         name: 'verify',
         component: () => import('@/views/form/index'),
-        meta: { title: '工单审核', icon: 'form' }
-      }
-    ]
-  },
-  {
-    path: '/db',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'db',
-        component: () => import('@/views/form/index'),
         meta: {
-          title: '数据库',
+          title: '工单审核',
           icon: 'form',
-          roles: ['admin', 'manager']
+          roles: ['admin', 'project-user']
         }
       }
     ]
@@ -335,26 +339,75 @@ export const constantRoutes = [
   {
     path: '/apply',
     component: Layout,
+    meta: {
+      title: '数据库',
+      icon: 'form',
+      roles: ['admin', 'project-user']
+    },
     children: [
       {
         path: 'index',
         name: 'ApplyOrder',
         component: () => import('@/views/form/index'),
-        meta: { title: '申请工单', icon: 'form' }
+        meta: {
+          title: '申请工单',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
       }
     ]
   },
   {
     path: '/order',
     component: Layout,
+    meta: {
+      title: '我的工单',
+      icon: 'form',
+      roles: ['admin', 'project-user']
+    },
     children: [
       {
         path: 'index',
         name: 'order',
         component: () => import('@/views/form/index'),
-        meta: { title: '我的工单', icon: 'form' }
+        meta: {
+          title: '我的工单',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
       }
     ]
+  }
+]
+
+/**
+ * constantRoutes
+ * a base page that does not have permission requirements
+ * all roles can be accessed
+ */
+export const constantRoutes = [
+  {
+    path: '/login',
+    component: () => import('@/views/login/index'),
+    hidden: true
+  },
+
+  {
+    path: '/404',
+    component: () => import('@/views/404'),
+    hidden: true
+  },
+
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/dashboard',
+    children: [{
+      path: 'dashboard',
+      name: '首页',
+      component: () => import('@/views/dashboard/index'),
+      meta: { title: '首页', icon: 'dashboard' }
+    }]
   },
   {
     path: '/exit',

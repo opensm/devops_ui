@@ -94,7 +94,6 @@
             </el-button>
           </router-link>
           <el-button
-            v-if="row.status != 'deleted'"
             size="medium"
             type="danger"
             icon="el-icon-delete"

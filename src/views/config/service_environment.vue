@@ -73,7 +73,8 @@
       </el-table-column>
       <el-table-column label="是否部署在k8s" width="150px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.kubernetes_enable }}</span>
+          <span v-if="row.kubernetes_enable">是</span>
+          <span v-else>否</span>
         </template>
       </el-table-column>
       <el-table-column label="关联k8s配置" width="auto" align="center">
@@ -83,7 +84,8 @@
       </el-table-column>
       <el-table-column label="是否部署在docker" width="150px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.docker_enable }}</span>
+          <span v-if="row.docker_enable">是</span>
+          <span v-else>否</span>
         </template>
       </el-table-column>
       <el-table-column label="关联docker配置" width="150px" align="center">
@@ -141,25 +143,32 @@
       >
 
         <el-form-item label="关联服务" prop="service">
-          <el-select v-model="temp.service" >
-            <el-option :value="svc.id" v-for="svc in selectList7" :label="svc.service_name" :key="svc.id"> {{ svc.service_name }}</el-option>
+          <el-select v-model="temp.service">
+            <el-option v-for="svc in selectList7" :key="svc.id" :value="svc.id" :label="svc.service_name"> {{ svc.service_name }}</el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="所属环境" prop="environment">
-          <el-select v-model="temp.environment" >
-            <el-option :value="env.id" v-for="env in selectList4" :key="env.id" :label="env.environment"> {{ env.environment }}</el-option>
+          <el-select v-model="temp.environment">
+            <el-option v-for="env in selectList4" :key="env.id" :value="env.id" :label="env.environment"> {{ env.environment }}</el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="资源" prop="resource">
           <el-select v-model="temp.resource">
-            <el-option :value="resource.id"  v-for="resource in selectList5" :key="resource.id" :label="'需求 CPU:' + resource.request_cpu + 'm/内存:' + resource.request_memory + 'MB, 限制 CPU:' + resource.limit_cpu + 'm/内存:' + resource.limit_memory + 'MB'">
+            <el-option v-for="resource in selectList5" :key="resource.id" :value="resource.id" :label="'需求 CPU:' + resource.request_cpu + 'm/内存:' + resource.request_memory + 'MB, 限制 CPU:' + resource.limit_cpu + 'm/内存:' + resource.limit_memory + 'MB'">
               需求 CPU:{{ resource.request_cpu }}m/内存:{{ resource.request_memory }}MB, 限制 CPU:{{ resource.limit_cpu }}m/内存:{{ resource.limit_memory }}MB
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="配置文件" prop="service_config">
-          <el-select v-model="temp.service_config" v-for="config in selectList6" :key="config.id">
-            <el-option :value="config.id" :label="config.service_name"> {{ config.service_name }}</el-option>
+          <el-select v-model="temp.service_config" multiple clearable>
+            <el-option
+              v-for="config in selectList6"
+              :key="config.id"
+              :value="config.id"
+              :label="config.service_name"
+            >
+              {{ config.service_name }}
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="是否部署在k8s" prop="kubernetes_enable">
@@ -172,17 +181,23 @@
             inactive-text="否"
           />
         </el-form-item>
-        <el-form-item label="关联k8s配置" prop="kubernetes_environment_config" v-if="temp.kubernetes_enable">
-          <el-select v-model="temp.kubernetes_environment_config" >
-            <el-option :value="config.id"
-                       :label="config.kubernetes_namespace"
-                       v-for="config in selectList2"
-                       :key="config.id">
+        <el-form-item
+          v-if="temp.kubernetes_enable"
+          label="关联k8s配置"
+          prop="kubernetes_environment_config"
+        >
+          <el-select v-model="temp.kubernetes_environment_config">
+            <el-option
+              v-for="config in selectList2"
+              :key="config.id"
+              :label="config.kubernetes_namespace"
+              :value="config.id"
+            >
               {{ config.kubernetes_namespace }}
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="是否部署在docker" prop="docker_enable">
+        <el-form-item v-if="! temp.kubernetes_enable" label="是否部署在docker" prop="docker_enable">
           <el-switch
             v-model="temp.docker_enable"
             style="display: block"
@@ -192,8 +207,16 @@
             inactive-text="否"
           />
         </el-form-item>
-        <el-form-item label="关联docker配置" prop="docker_environment_config" v-if="temp.docker_enable">
-          <el-select v-model="temp.docker_environment_config" v-for="config in selectList3" :key="config.id">
+        <el-form-item
+          v-if="temp.docker_enable"
+          label="关联docker配置"
+          prop="docker_environment_config"
+        >
+          <el-select
+            v-for="config in selectList3"
+            :key="config.id"
+            v-model="temp.docker_environment_config"
+          >
             <el-option :value="config.id" :label="config.docker_instances"> {{ config.docker_instances }}</el-option>
           </el-select>
         </el-form-item>
@@ -205,11 +228,11 @@
           />
         </el-form-item>
         <el-form-item label="关联项目" prop="project">
-          <el-select v-model="temp.project" >
-            <el-option :value="config.id" :label="config.name" v-for="config in selectList1" :key="config.id"> {{ config.name }}</el-option>
+          <el-select v-model="temp.project">
+            <el-option v-for="config in selectList1" :key="config.id" :value="config.id" :label="config.name"> {{ config.name }}</el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label=自动部署？ prop="auto_deploy">
+        <el-form-item label="自动部署？" prop="auto_deploy">
           <el-switch
             v-model="temp.auto_deploy"
             style="display: block"
@@ -242,9 +265,9 @@ import {
   getDockerEnvironmentConfigurationList
 } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
-import { getEnvironmentList } from "@/api/environment";
-import {getServiceResourceList, getServiceConfigList, getServiceList} from "@/api/service";
-import { getProjectList } from "@/api/project";
+import { getEnvironmentList } from '@/api/environment'
+import { getServiceResourceList, getServiceConfigList, getServiceList } from '@/api/service'
+import { getProjectList } from '@/api/project'
 import Pagination from '@/components/Pagination'
 export default {
   name: 'ComplexTable',
@@ -268,8 +291,7 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
+        name: undefined,
         type: undefined,
         sort: '+id'
       },
@@ -299,8 +321,6 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         environment: [
           { required: true, message: '环境必须填写', trigger: 'blur' }
@@ -350,44 +370,44 @@ export default {
     this.getService()
   },
   methods: {
-    getProject(){
-      getProjectList().then(( response =>{
+    getProject() {
+      getProjectList().then(response => {
         this.selectList1 = response.data
-      }))
+      })
     },
-    getKubernetesEnvironmentConfiguration(){
-      getKubernetesEnvironmentConfigurationList().then(( response =>{
+    getKubernetesEnvironmentConfiguration() {
+      getKubernetesEnvironmentConfigurationList().then(response => {
         this.selectList2 = response.data
-      }))
+      })
     },
-    getDockerEnvironmentConfiguration(){
-      getDockerEnvironmentConfigurationList().then(( response =>{
+    getDockerEnvironmentConfiguration() {
+      getDockerEnvironmentConfigurationList().then(response => {
         this.selectList3 = response.data
-      }))
+      })
     },
-    getEnvironmentList(){
-      getEnvironmentList().then(( response =>{
+    getEnvironmentList() {
+      getEnvironmentList().then(response => {
         this.selectList4 = response.data
-      }))
+      })
     },
-    getServiceResource(){
-      getServiceResourceList().then(( response =>{
+    getServiceResource() {
+      getServiceResourceList().then(response => {
         this.selectList5 = response.data
-      }))
+      })
     },
-    getServiceConfig(){
-      getServiceConfigList().then(( response =>{
+    getServiceConfig() {
+      getServiceConfigList().then(response => {
         this.selectList6 = response.data
-      }))
+      })
     },
-    getService(){
-      getServiceList().then(( response =>{
+    getService() {
+      getServiceList().then(response => {
         this.selectList7 = response.data
-      }))
+      })
     },
     getList() {
       this.listLoading = true
-      getServiceEnvironmentList(this.listQuery).then((response) => {
+      getServiceEnvironmentList(this.listQuery).then(response => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -399,13 +419,6 @@ export default {
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
-      row.status = status
     },
     sortChange(data) {
       const { prop, order } = data
@@ -435,7 +448,7 @@ export default {
         git_branch_or_tag: '',
         service_prometheus: '',
         project: '',
-        auto_deploy:false
+        auto_deploy: false
       }
     },
     handleCreate() {
@@ -465,7 +478,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

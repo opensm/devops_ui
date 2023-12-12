@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border="true"
+      border
       fit
       highlight-current-row
       style="width: 100%"
@@ -53,21 +53,29 @@
       </el-table-column>
       <el-table-column label="项目" width="110px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.project }}</span>
+          <span>
+            {{ row.rw_project }}
+          </span>
         </template>
       </el-table-column>
       <el-table-column label="操作权限" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.rw_permissions }}</span>
+          <span
+            v-for="per in selectList2"
+            v-if="row.rw_permissions === per.value"
+          >
+            {{ per.label }}
+          </span>
         </template>
       </el-table-column>
       <el-table-column label="审批权限" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.app_permissions }}</span>
+          <span v-if="row.app_permissions">是</span>
+          <span v-else>否</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
         width="400px"
         class-name="small-padding fixed-width"
@@ -77,7 +85,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -153,22 +160,6 @@
         </el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
@@ -204,16 +195,10 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
         title: undefined,
         type: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
-      showReviewer: false,
       temp: {
         id: undefined,
         project: '',
@@ -226,20 +211,17 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         project: [
-          { required: true, message: 'project is required', trigger: 'change' }
+          { required: true, message: '请填写项目', trigger: 'change' }
         ],
         rw_permissions: [
-          { required: true, message: 'rw_permissions is required', trigger: 'blur' }
+          { required: true, message: '请关联权限内容', trigger: 'blur' }
         ],
         app_permissions: [
-          { required: true, message: 'app_permissions is required', trigger: 'blur' }
+          { required: true, message: '请关联审批权限', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {
@@ -267,13 +249,6 @@ export default {
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
-      row.status = status
     },
     sortChange(data) {
       const { prop, order } = data
@@ -324,7 +299,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
