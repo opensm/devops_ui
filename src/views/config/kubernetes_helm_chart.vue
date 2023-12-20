@@ -1,23 +1,6 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input
-        v-model="listQuery.name"
-        placeholder="Title"
-        style="width: 200px"
-        class="filter-item"
-        @keyup.enter.native="handleFilter"
-      />
-      <el-button
-        v-waves
-        style="margin-left: 10px"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-search"
-        @click="handleFilter"
-      >
-        搜索
-      </el-button>
       <el-button
         class="filter-item"
         style="margin-left: 10px"
@@ -82,7 +65,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -131,11 +113,10 @@
           />
         </el-form-item>
         <el-form-item label="workload类型" prop="workload_type">
-          <el-input
-            v-model="temp.workload_type"
-            class="filter-item"
-            placeholder="workload类型"
-          />
+          <el-select v-model="temp.workload_type">
+            <el-option value="deployment" label="无状态（deployment）" />
+            <el-option value="statefulset" label="有状态（statefulset）" />
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -147,22 +128,6 @@
           确认
         </el-button>
       </div>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
     </el-dialog>
   </div>
 </template>
@@ -187,20 +152,11 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
-      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
-      showReviewer: false,
       temp: {
         id: undefined,
         helm_repo: '',
@@ -214,23 +170,20 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         helm_repo: [
-          { required: true, message: 'helm_repo is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         helm_repo_chart: [
-          { required: true, message: 'helm_repo_chart is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         helm_repo_chart_version: [
-          { required: true, message: 'helm_repo_chart_version is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         workload_type: [
-          { required: true, message: 'workload_type is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {
@@ -355,3 +308,8 @@ export default {
   }
 }
 </script>
+<style>
+.el-select {
+  width: 100%;
+}
+</style>

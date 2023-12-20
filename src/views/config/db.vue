@@ -61,14 +61,14 @@
           <span>{{ row.address }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="所属环境" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.rw_environment }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="用户" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.username }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="密码" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.password }}</span>
         </template>
       </el-table-column>
       <el-table-column label="uri连接地址" width="auto" align="center">
@@ -92,7 +92,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.username != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -119,18 +118,26 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="数据库类型" prop="name">
-          <el-input
-            v-model="temp.db_type"
-            class="filter-item"
-            placeholder="数据库类型"
-          />
+        <el-form-item label="数据库类型" prop="db_type">
+          <el-select v-model="temp.db_type">
+            <el-option value="mysql" label="MySQL" />
+            <el-option value="mongodb" label="MongoDB" />
+            <el-option value="clickhouse" label="ClickHouse" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="链接地址" prop="address">
+        <el-form-item label="Is uri" prop="is_uri">
+          <el-switch v-model="temp.is_uri" />
+        </el-form-item>
+        <el-form-item label="所属环境" prop="environment">
+          <el-select v-model="temp.environment">
+            <el-option v-for="(item,index) in selectList" :key="index" :label="item.environment" :value="item.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="地址" prop="address">
           <el-input
             v-model="temp.address"
             class="filter-item"
-            placeholder="链接地址"
+            placeholder="连接地址IP:Port"
           />
         </el-form-item>
         <el-form-item label="用户" prop="username">
@@ -147,7 +154,7 @@
             placeholder="密码"
           />
         </el-form-item>
-        <el-form-item label="uri连接地址" prop="uri">
+        <el-form-item v-if="temp.is_uri" label="uri连接地址" prop="uri">
           <el-input
             v-model="temp.uri"
             class="filter-item"
@@ -172,22 +179,6 @@
         </el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
@@ -197,8 +188,12 @@ import {
   updateDB,
   deleteDB
 } from '@/api/config'
+import { getEnvironmentList } from '@/api/environment'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
+import {enSecret} from "@/utils/secret";
+import store from "@/store";
+import {mapGetters} from "vuex";
 export default {
   name: 'ComplexTable',
   components: {
@@ -211,22 +206,17 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
-      showReviewer: false,
       temp: {
         id: undefined,
-        name: '',
+        db_type: '',
+        is_uri: false,
+        environment: '',
         address: '',
         password: '',
         username: '',
@@ -239,35 +229,49 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
-        name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+        db_type: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        is_uri: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        environment: [
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         address: [
-          { required: true, message: 'address is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         username: [
-          { required: true, message: 'username is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: 'password is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         uri: [
-          { required: true, message: 'uri is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         desc: [
-          { required: true, message: 'desc is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {
     this.getList()
+    this.getEnvironmentList()
+  },
+  computed: {
+    ...mapGetters([
+      'publickey'
+    ])
   },
   methods: {
+    getEnvironmentList() {
+      getEnvironmentList().then(response => {
+        this.selectList = response.data
+      })
+    },
     getList() {
       this.listLoading = true
       getDBList(this.listQuery).then((response) => {
@@ -282,13 +286,6 @@ export default {
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
-    },
-    handleModifyusername(row, username) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
-      row.username = username
     },
     sortChange(data) {
       const { prop, order } = data
@@ -307,8 +304,14 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        name: '',
-        address: ''
+        db_type: '',
+        is_uri: false,
+        environment: '',
+        address: '',
+        password: '',
+        username: '',
+        uri: '',
+        desc: ''
       }
     },
     handleCreate() {
@@ -322,6 +325,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
+          this.temp.password = enSecret(this.temp.password, store.getters.publickey)
           createDB(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
@@ -349,6 +353,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
+          tempData.password = enSecret(tempData.password, store.getters.publickey)
           updateDB(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
@@ -384,3 +389,11 @@ export default {
   }
 }
 </script>
+<style>
+.el-select {
+  width: 100%;
+}
+.el-radio-group {
+  width: 100%;
+}
+</style>

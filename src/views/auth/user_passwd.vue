@@ -84,7 +84,6 @@ export default {
         ]
       },
       temp: {
-
       },
       form: {
         password: '',

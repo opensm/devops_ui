@@ -51,56 +51,41 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="所属环境" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.environment }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="关联服务" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.service }}</span>
+          <span>{{ row.rw_service }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="关联项目" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.rw_project }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="所属环境" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.rw_environment }}</span>
         </template>
       </el-table-column>
       <el-table-column label="资源" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.resource }}</span>
+          <span v-html="row.rw_resource" />
         </template>
       </el-table-column>
-      <el-table-column label="配置文件" width="auto" align="center">
+      <el-table-column label="部署在k8s" width="150px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.service_config }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="是否部署在k8s" width="150px" align="center">
-        <template slot-scope="{ row }">
-          <span v-if="row.kubernetes_enable">是</span>
+          <span v-if="row.kubernetes_enable">{{ row.rw_kubernetes_environment_config }}</span>
           <span v-else>否</span>
         </template>
       </el-table-column>
-      <el-table-column label="关联k8s配置" width="auto" align="center">
+      <el-table-column label="部署在docker" width="150px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.kubernetes_environment_config }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="是否部署在docker" width="150px" align="center">
-        <template slot-scope="{ row }">
-          <span v-if="row.docker_enable">是</span>
+          <span v-if="row.docker_enable">{{ row.rw_docker_environment_config }}</span>
           <span v-else>否</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="关联docker配置" width="150px" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.docker_environment_config }}</span>
         </template>
       </el-table-column>
       <el-table-column label="所用分支" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.git_branch_or_tag }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="关联项目" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.project }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -114,7 +99,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -144,12 +128,26 @@
 
         <el-form-item label="关联服务" prop="service">
           <el-select v-model="temp.service">
-            <el-option v-for="svc in selectList7" :key="svc.id" :value="svc.id" :label="svc.service_name"> {{ svc.service_name }}</el-option>
+            <el-option
+              v-for="svc in selectList7"
+              :key="svc.id"
+              :value="svc.id"
+              :label="svc.service_name"
+            >
+              {{ svc.service_name }}
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="所属环境" prop="environment">
           <el-select v-model="temp.environment">
-            <el-option v-for="env in selectList4" :key="env.id" :value="env.id" :label="env.environment"> {{ env.environment }}</el-option>
+            <el-option
+              v-for="env in selectList4"
+              :key="env.id"
+              :value="env.id"
+              :label="env.environment"
+            >
+              {{ env.environment }}
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="资源" prop="resource">

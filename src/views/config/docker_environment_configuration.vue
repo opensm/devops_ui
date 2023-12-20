@@ -58,7 +58,7 @@
       </el-table-column>
       <el-table-column label="ssh所属的KEY" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.docker_ssh }}</span>
+          <span>{{ row.rw_docker_ssh }}</span>
         </template>
       </el-table-column>
       <el-table-column label="docker副本数" width="auto" align="center">
@@ -147,6 +147,7 @@ import {
 import waves from '@/directive/waves' // waves directive
 import { getSshKeyList } from '@/api/sshkey'
 import Pagination from '@/components/Pagination'
+import { validateIP } from '@/utils/validate'
 export default {
   name: 'ComplexTable',
   components: {
@@ -154,6 +155,16 @@ export default {
   },
   directives: { waves },
   data() {
+    const validateIPAddress = (rule, value, callback) => {
+      const iplist = value.split(',')
+      iplist.forEach((item, index) => {
+        console.log(item)
+        if (!validateIP(item)) {
+          callback(new Error('请输入正确的IP地址：' + item))
+        }
+      })
+      callback()
+    }
     return {
       tableKey: 0,
       list: null,
@@ -189,13 +200,14 @@ export default {
       pvData: [],
       rules: {
         docker_instances: [
-          { required: true, message: 'docker_instances is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' },
+          { validator: validateIPAddress, trigger: 'blur' }
         ],
         docker_ssh: [
-          { required: true, message: 'docker_ssh is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         docker_replica_count: [
-          { required: true, message: 'docker_replica_count is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ]
       },
       downloadLoading: false

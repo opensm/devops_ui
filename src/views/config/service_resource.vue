@@ -51,22 +51,22 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="需要CPU" width="auto" align="center">
+      <el-table-column label="需要CPU(m)" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.request_cpu }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="需要Memory" width="auto" align="center">
+      <el-table-column label="需要Memory(MB)" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.request_memory }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="限制CPU" width="auto" align="center">
+      <el-table-column label="限制CPU(m)" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.limit_cpu }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="限制Memory" width="auto" align="center">
+      <el-table-column label="限制Memory(GB)" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.limit_memory }}</span>
         </template>
@@ -82,7 +82,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -199,23 +198,23 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: '修改',
-        create: '新增'
+        update: '服务资源依赖修改',
+        create: '服务资源依赖新增'
       },
       dialogPvVisible: false,
       pvData: [],
       rules: {
         request_cpu: [
-          { required: true, message: 'request_cpu is required', trigger: 'blur' }
+          { required: true, message: '字段必须填写', trigger: 'blur' }
         ],
         request_memory: [
-          { required: true, message: 'request_memory is required', trigger: 'blur' }
+          { required: true, message: '字段必须填写', trigger: 'blur' }
         ],
         limit_memory: [
-          { required: true, message: 'limit_memory is required', trigger: 'blur' }
+          { required: true, message: '字段必须填写', trigger: 'blur' }
         ],
         limit_cpu: [
-          { required: true, message: 'limit_cpu is required', trigger: 'blur' }
+          { required: true, message: '字段必须填写', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -342,3 +341,8 @@ export default {
   }
 }
 </script>
+<style>
+.el-select {
+  width: 100%;
+}
+</style>

@@ -349,3 +349,11 @@ export default {
   }
 }
 </script>
+<style>
+.el-select {
+  width: 100%;
+}
+.el-radio-group {
+  width: 100%;
+}
+</style>

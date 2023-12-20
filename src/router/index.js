@@ -304,6 +304,16 @@ export const asyncRoutes = [
         }
       },
       {
+        path: 'nacos',
+        name: 'nacos',
+        component: () => import('@/views/config/nacos'),
+        meta: {
+          title: '配置管理',
+          icon: 'el-icon-files',
+          roles: ['admin', 'manager', 'project-manager']
+        }
+      },
+      {
         path: 'project',
         name: 'Project',
         component: () => import('@/views/config/project'),
@@ -316,18 +326,38 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/verify',
+    path: '/order',
     component: Layout,
     meta: {
-      title: '工单审核',
+      title: '工单管理',
       icon: 'form',
-      roles: ['admin', 'project-approve']
+      roles: ['admin', 'project-user']
     },
     children: [
       {
+        path: 'list',
+        name: 'order',
+        component: () => import('@/views/order/list'),
+        meta: {
+          title: '我的工单',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'apply',
+        name: 'ApplyOrder',
+        component: () => import('@/views/order/apply'),
+        meta: {
+          title: '申请工单',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
         path: 'index',
         name: 'verify',
-        component: () => import('@/views/form/index'),
+        component: () => import('@/views/order/verify'),
         meta: {
           title: '工单审核',
           icon: 'form',
@@ -337,41 +367,30 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/apply',
+    path: '/jira',
     component: Layout,
     meta: {
-      title: '数据库',
+      title: 'Jira与制品',
       icon: 'form',
-      roles: ['admin', 'project-user']
+      roles: ['admin', 'project-approve']
     },
     children: [
       {
         path: 'index',
-        name: 'ApplyOrder',
+        name: 'jira',
         component: () => import('@/views/form/index'),
         meta: {
-          title: '申请工单',
+          title: 'jira配置',
           icon: 'form',
           roles: ['admin', 'project-user']
         }
-      }
-    ]
-  },
-  {
-    path: '/order',
-    component: Layout,
-    meta: {
-      title: '我的工单',
-      icon: 'form',
-      roles: ['admin', 'project-user']
-    },
-    children: [
+      },
       {
         path: 'index',
-        name: 'order',
+        name: 'jira',
         component: () => import('@/views/form/index'),
         meta: {
-          title: '我的工单',
+          title: 'jira版本管理',
           icon: 'form',
           roles: ['admin', 'project-user']
         }
@@ -408,18 +427,6 @@ export const constantRoutes = [
       component: () => import('@/views/dashboard/index'),
       meta: { title: '首页', icon: 'dashboard' }
     }]
-  },
-  {
-    path: '/exit',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'exit',
-        component: () => import('@/views/form/index'),
-        meta: { title: '退出', icon: 'form' }
-      }
-    ]
   },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

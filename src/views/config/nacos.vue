@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border
+      :border="true"
       fit
       highlight-current-row
       style="width: 100%"
@@ -51,24 +51,29 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Harbor配置" width="auto" align="center">
+      <el-table-column label="所属环境" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.kubernetes_pull_secret }}</span>
+          <span>{{ row.rw_environment }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="副本数" width="auto" align="center">
+      <el-table-column label="地址" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.kubernetes_replica_count }}</span>
+          <span>{{ row.address }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="关联k8s认证信息" width="auto" align="center">
+      <el-table-column label="协议" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.rw_kubernetes_auth }}</span>
+          <span>{{ row.protocol }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="k8s命名空间" width="auto" align="center">
+      <el-table-column label="用户" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.kubernetes_namespace }}</span>
+          <span>{{ row.username }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.desc }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -82,7 +87,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -106,34 +110,39 @@
         :rules="rules"
         :model="temp"
         label-position="left"
-        label-width="180px"
+        label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="Harbor配置" prop="kubernetes_pull_secret">
-          <el-input
-            v-model="temp.kubernetes_pull_secret"
-            class="filter-item"
-            placeholder="Harbor配置"
-          />
-        </el-form-item>
-        <el-form-item label="副本数" prop="kubernetes_replica_count">
-          <el-input-number
-            v-model="temp.kubernetes_replica_count"
-            class="filter-item"
-            placeholder="副本数"
-            :min="1"
-          />
-        </el-form-item>
-        <el-form-item label="认证信息" prop="kubernetes_auth">
-          <el-select v-for="(k8s) in selectList" :key="k8s.id" v-model="temp.kubernetes_auth">
-            <el-option :value="k8s.id" :label="k8s.name">{{ k8s.name }}</el-option>
+        <el-form-item label="所属环境" prop="environment">
+          <el-select v-model="temp.environment">
+            <el-option v-for="(item ) in selectList" :label="item.environment" :value="item.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="命名空间" prop="kubernetes_namespace">
+        <el-form-item label="协议" prop="protocol">
+          <el-radio-group v-model="temp.protocol">
+            <el-radio-button label="http" />
+            <el-radio-button label="grpc" />
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="地址" prop="address">
           <el-input
-            v-model="temp.kubernetes_namespace"
+            v-model="temp.address"
             class="filter-item"
-            placeholder="Kubernetes命名空间"
+            placeholder="链接地址"
+          />
+        </el-form-item>
+        <el-form-item label="用户" prop="username">
+          <el-input
+            v-model="temp.username"
+            class="filter-item"
+            placeholder="用户"
+          />
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input
+            v-model="temp.password"
+            class="filter-item"
+            placeholder="密码"
           />
         </el-form-item>
       </el-form>
@@ -151,14 +160,17 @@
 </template>
 <script>
 import {
-  getKubernetesEnvironmentConfigurationList,
-  createKubernetesEnvironmentConfiguration,
-  updateKubernetesEnvironmentConfiguration,
-  deleteKubernetesEnvironmentConfiguration
+  getNaCOSList,
+  createNaCOS,
+  updateNaCOS,
+  deleteNaCOS
 } from '@/api/config'
-import { getKubernetesList } from '@/api/kubernetes'
 import waves from '@/directive/waves' // waves directive
+import { getEnvironmentList } from '@/api/environment'
 import Pagination from '@/components/Pagination'
+import { enSecret } from '@/utils/secret'
+import store from "@/store";
+import { mapGetters } from "vuex";
 export default {
   name: 'ComplexTable',
   components: {
@@ -170,64 +182,64 @@ export default {
       tableKey: 0,
       list: null,
       total: 0,
-      listLoading: true,
       selectList: [],
+      listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
       temp: {
         id: undefined,
-        kubernetes_pull_secret: '',
-        kubernetes_environment_from_Sec: '',
-        kubernetes_replica_count: 0,
-        kubernetes_auth: '',
-        kubernetes_namespace: ''
+        protocol: 'http',
+        address: '',
+        password: '',
+        username: '',
+        environment: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'kubernetes环境部署修改',
-        create: 'kubernetes环境部署新增'
+        update: '修改',
+        create: '新增'
       },
       rules: {
-        kubernetes_pull_secret: [
-          { required: true, message: 'harbor关联secret必须填写', trigger: 'blur' }
+        protocol: [
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
-        kubernetes_auth: [
-          { required: true, message: 'Kubernetes关联集群必须填写', trigger: 'blur' }
+        address: [
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
-        kubernetes_namespace: [
-          { required: true, message: '命名空间 必须填写', trigger: 'blur' }
+        username: [
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
-        kubernetes_replica_count: [
-          { required: true, message: '副本个数 必须填写', trigger: 'blur' }
+        password: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        environment: [
+          { required: true, message: '字段必填', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {
     this.getList()
-    this.getKubernetes()
+    this.getEnvironmentList()
+  },
+  computed: {
+    ...mapGetters([
+      'publickey'
+    ])
   },
   methods: {
-    getKubernetes() {
-      getKubernetesList().then(response => {
+    getEnvironmentList() {
+      getEnvironmentList().then(response => {
         this.selectList = response.data
       })
     },
     getList() {
       this.listLoading = true
-      getKubernetesEnvironmentConfigurationList(this.listQuery).then((response) => {
+      getNaCOSList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -239,13 +251,6 @@ export default {
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
-      row.status = status
     },
     sortChange(data) {
       const { prop, order } = data
@@ -263,12 +268,11 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        kubernetes_pull_secret: '',
-        kubernetes_environment_from_Sec: '',
-        kubernetes_replica_count: 0,
-        kubernetes_auth: '',
-        kubernetes_namespace: ''
+        protocol: 'http',
+        address: '',
+        password: '',
+        username: '',
+        environment: ''
       }
     },
     handleCreate() {
@@ -282,7 +286,8 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createKubernetesEnvironmentConfiguration(this.temp).then(response => {
+          this.temp.password = enSecret(this.temp.password, store.getters.publickey)
+          createNaCOS(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -309,7 +314,8 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateKubernetesEnvironmentConfiguration(tempData.id, tempData).then(response => {
+          tempData.password = enSecret(tempData.password, store.getters.publickey)
+          updateNaCOS(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -323,8 +329,8 @@ export default {
         }
       })
     },
-    handleDelete(row) {
-      deleteKubernetesEnvironmentConfiguration(row.id).then(response => {
+    handleDelete(row, index) {
+      deleteNaCOS(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({
@@ -335,6 +341,7 @@ export default {
         })
         this.handleFilter()
       })
+      this.list.splice(index, 1)
     },
     getSortClass: function(key) {
       const sort = this.listQuery.sort
@@ -347,7 +354,7 @@ export default {
 .el-select {
   width: 100%;
 }
-.el-input-number {
+.el-radio-group {
   width: 100%;
 }
 </style>

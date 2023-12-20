@@ -16,11 +16,70 @@
                 服务名称
               </MDinput>
             </el-form-item>
-            {{ postForm }}
 
             <div class="postInfo-container">
               <el-row>
-                <el-col :span="22" style="margin-bottom: 40px;">
+                <el-col :span="10" style="margin-bottom: 40px;">
+                  <el-form-item style="width: 80%" label="代码仓库" prop="service_git">
+                    <el-input
+                      v-model="postForm.service_git"
+                      class="filter-item"
+                      size="medium"
+                      placeholder="代码仓库"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="10" style="margin-bottom: 40px;">
+                  <el-form-item style="width: 50%" label="关联配置" prop="service_config">
+                    <el-select
+                      v-model="postForm.service_config"
+                      clearable
+                      multiple
+                    >
+                      <el-option
+                        v-for="(config,index) in configList"
+                        :key="index"
+                        :value="config.id"
+                        :label="config.service_name"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <div style="margin-top: 15px;">
+                  <el-form-item label="编译命令" prop="service_compile">
+
+                    <el-select v-model="compile_exe" placeholder="请选择" style="width: 20%">
+                      <el-option label="npm版本：6.14.4，node版本：v16.15.1" value="npm-6.14.4-node-v16.15.1">
+                        npm版本：6.14.4，node版本：v16.15.1
+                      </el-option>
+                      <el-option label="npm版本：8.11.0，node版本：v16.15.1" value="npm-8.11.0-node-v16.15.1">
+                        npm版本：8.11.0，node版本：v16.15.1
+                      </el-option>
+                      <el-option label="mvn版本：3.6.3，java版本：1.8.0_202" value="mvn-3.6.3-java-1.8.0_202">
+                        mvn版本：3.6.3，java版本：1.8.0_202
+                      </el-option>
+                      <el-option label="mvn版本：3.8.6，java版本：1.8.0_202" value="mvn-3.8.6-java-1.8.0_202">
+                        mvn版本：3.8.6，java版本：1.8.0_202
+                      </el-option>
+                      <el-option label="mvn版本：3.8.6，openjdk版本：11.0.17.0.8" value="mvn-3.8.6-openjdk-11.0.17.0.8">
+                        mvn版本：3.8.6，openjdk版本：11.0.17.0.8
+                      </el-option>
+                    </el-select>
+                    <el-input
+                      v-model="postForm.service_compile"
+                      style="width: 60%"
+                      class="input-with-select"
+                      placeholder="代码仓库"
+                    />
+                  </el-form-item>
+
+                </div>
+              </el-row>
+              <el-divider content-position="center">代码相关</el-divider>
+              <el-row>
+                <el-col :span="22">
                   <el-form-item label="端口是否启用" prop="service_ports_enable">
                     <el-switch
                       v-model="postForm.service_ports_enable"
@@ -29,6 +88,7 @@
                       inactive-color="#ff4949"
                       active-text="是"
                       inactive-text="否"
+                      @change="changePortEnable()"
                     />
                   </el-form-item>
                 </el-col>
@@ -41,7 +101,7 @@
                         :key="port.id"
                         :label="'端口名称：' + index"
                         :prop="'service_ports.' + index + '.name'"
-                        :rules="[{ required: true, message: '端口名称不能为空', trigger: 'blur' }, { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' }, { validator: validateServiceName, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }]"
+                        :rules="port_rules"
                       >
                         <el-input v-model="port.name" />
                       </el-form-item>
@@ -89,71 +149,8 @@
                 <el-form-item>
                   <el-button type="success" @click="addPort">新增端口</el-button>
                 </el-form-item>
+                <el-divider content-position="center">端口配置</el-divider>
               </el-row>
-              <el-divider content-position="center">端口配置</el-divider>
-            </div>
-            <div class="postInfo-container">
-              <el-row>
-                <el-col :span="10" style="margin-bottom: 40px;">
-                  <el-form-item style="width: 80%" label="代码仓库" prop="service_git">
-                    <el-input
-                      v-model="postForm.service_git"
-                      class="filter-item"
-                      size="medium"
-                      placeholder="代码仓库"
-                    />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="10" style="margin-bottom: 40px;">
-                  <el-form-item style="width: 50%" label="关联配置" prop="service_config">
-                    <el-select
-                      v-model="postForm.service_config"
-                      clearable
-                      multiple
-                      multiple-limit="3"
-                    >
-                      <el-option
-                        v-for="(config,index) in configList"
-                        :key="index"
-                        :value="config.id"
-                        :label="config.service_name"
-                      />
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              <el-row>
-                <div style="margin-top: 15px;">
-                  <el-form-item label="编译命令" prop="service_compile">
-
-                    <el-select v-model="compile_exe" placeholder="请选择" style="width: 20%">
-                      <el-option label="npm版本：6.14.4，node版本：v16.15.1" value="npm-6.14.4-node-v16.15.1">
-                        npm版本：6.14.4，node版本：v16.15.1
-                      </el-option>
-                      <el-option label="npm版本：8.11.0，node版本：v16.15.1" value="npm-8.11.0-node-v16.15.1">
-                        npm版本：8.11.0，node版本：v16.15.1
-                      </el-option>
-                      <el-option label="mvn版本：3.6.3，java版本：1.8.0_202" value="mvn-3.6.3-java-1.8.0_202">
-                        mvn版本：3.6.3，java版本：1.8.0_202
-                      </el-option>
-                      <el-option label="mvn版本：3.8.6，java版本：1.8.0_202" value="mvn-3.8.6-java-1.8.0_202">
-                        mvn版本：3.8.6，java版本：1.8.0_202
-                      </el-option>
-                      <el-option label="mvn版本：3.8.6，openjdk版本：11.0.17.0.8" value="mvn-3.8.6-openjdk-11.0.17.0.8">
-                        mvn版本：3.8.6，openjdk版本：11.0.17.0.8
-                      </el-option>
-                    </el-select>
-                    <el-input
-                      v-model="postForm.service_compile"
-                      style="width: 60%"
-                      class="input-with-select"
-                      placeholder="代码仓库"
-                    />
-                  </el-form-item>
-
-                </div>
-              </el-row>
-              <el-divider content-position="center">代码相关</el-divider>
               <el-row>
                 <el-form-item style="width: 80%" label="是否开启环境变量" prop="service_environment_enable">
                   <el-switch
@@ -163,6 +160,7 @@
                     inactive-color="#ff4949"
                     active-text="是"
                     inactive-text="否"
+                    @change="changeEnvEnable()"
                   />
                 </el-form-item>
               </el-row>
@@ -174,7 +172,7 @@
                         :key="index"
                         :label="'环境变量键：' + index"
                         :prop="'service_environment.' + index + '.key'"
-                        :rules="[{required: true, message: '环境变量键不能为空', trigger: 'blur'},{ pattern: /^[^\u4e00-\u9fa5]+$/, message: '环境变量键不能为空', trigger: 'blur' },{ validator: checkSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }]"
+                        :rules="env_rule"
                       >
                         <el-input v-model="env.key" />
                       </el-form-item>
@@ -184,7 +182,7 @@
                         :key="index"
                         :label="'环境变量值：' + index"
                         :prop="'service_environment.' + index + '.value'"
-                        :rules="[{required: true, message: '环境变量值不能为空', trigger: 'blur'}]"
+                        :rules="[{ required: true, message: '环境变量值不能为空', trigger: 'blur' }]"
                       >
                         <el-input v-model="env.value" />
                       </el-form-item>
@@ -212,11 +210,11 @@
                       </el-form-item>
                     </el-col>
                   </el-row>
-                  <el-divider content-position="center">环境变量配置</el-divider>
                 </div>
                 <el-form-item>
                   <el-button type="success" @click="addEnv()">新增环境变量</el-button>
                 </el-form-item>
+                <el-divider content-position="center">环境变量配置</el-divider>
               </el-row>
               <el-row>
                 <el-form-item style="width: 80%" label="是否开启健康检查" prop="service_healthy_enable">
@@ -600,7 +598,7 @@
                   <el-form-item
                     label="域名证书信息"
                     prop="service_domain.hosts"
-                    :rules="[{required: true, message: '是否启用域名不能为空', trigger: 'blur'}]"
+                    :rules="[{ required: true, message: '是否启用域名不能为空', trigger: 'blur' }]"
                   >
                     <el-input
                       v-model="postForm.service_domain.hosts"
@@ -675,7 +673,7 @@ import {
   updateService,
   getServiceConfigList
 } from '@/api/service'
-import { checkSpecialKey } from '@/utils/validate'
+import { checkSpecialKey, validateURL } from '@/utils/validate'
 import CodeEditor from '@/components/CodeEditor/index.vue'
 const defaultForm = {
   id: undefined,
@@ -709,8 +707,25 @@ export default {
     }
   },
   data() {
-    const validateServiceName = (rule, value, callback) => {
+    const validateSpecialKey = (rule, value, callback) => {
       if (!checkSpecialKey(value)) {
+        callback(new Error('请不要填入特殊字符'))
+      } else {
+        callback()
+      }
+    }
+    // const validatePort = (rule, value, callback) => {
+    //   if (this.postForm.service_ports_enable) {
+    //     console.log(this.postForm.service_ports.length)
+    //     if (this.postForm.service_ports === []) {
+    //       callback(new Error('端口必须填!'))
+    //     } else {
+    //       callback()
+    //     }
+    //   }
+    // }
+    const validateGit = (rule, value, callback) => {
+      if (!validateURL(value)) {
         callback(new Error('请不要填入特殊字符'))
       } else {
         callback()
@@ -723,33 +738,43 @@ export default {
       compile_exe: 'mvn-3.6.3-java-1.8.0_202',
       postForm: Object.assign({}, defaultForm),
       loading: false,
+      port_rules: [
+        { required: true, message: '端口名称不能为空', trigger: 'blur' },
+        { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
+        { validator: validateSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
+      ],
+      env_rule: [
+        { required: true, message: '环境变量键不能为空', trigger: 'blur' },
+        { pattern: /^[^\u4e00-\u9fa5]+$/, message: '环境变量键不能为空', trigger: 'blur' },
+        { validator: validateSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
+      ],
       rules: {
         service_name: [
-          { required: true, message: 'service_name is required', trigger: 'blur' },
+          { required: true, message: '该字段是必填项', trigger: 'blur' },
           { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
-          { validator: validateServiceName, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
+          { validator: validateSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
         ],
-        // service_ports: [{required: true, message: 'service_ports is required', trigger: 'blur'}],
         service_ports_enable: [
-          { required: true, message: 'service_ports_enable is required', trigger: 'blur' }
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
         ],
         service_git: [
-          { required: true, message: 'service_git is required', trigger: 'blur' }
+          { required: true, message: '该字段是必填项', trigger: 'blur' },
+          { validator: validateGit, trigger: 'blur' }
         ],
         service_compile: [
-          { required: true, message: 'service_compile is required', trigger: 'blur' }
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
         ],
         service_healthy_enable: [
-          { required: true, message: 'service_healthy_enable is required', trigger: 'blur' }
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
         ],
         service_prometheus_enable: [
-          { required: true, message: 'service_prometheus_enable is required', trigger: 'blur' }
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
         ],
         service_domain_enable: [
-          { required: true, message: 'service_domain_enable is required', trigger: 'blur' }
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
         ],
         service_skywalking_enable: [
-          { required: true, message: 'service_skywalking_enable is required', trigger: 'blur' }
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
         ]
       },
       tempRoute: {}
@@ -767,7 +792,6 @@ export default {
     this.tempRoute = Object.assign({}, this.$route)
   },
   methods: {
-    checkSpecialKey,
     getConfigList() {
       getServiceConfigList().then(response => {
         this.configList = response.data
@@ -797,7 +821,6 @@ export default {
     submitForm() {
       console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
-        console.log(valid)
         if (valid) {
           this.loading = true
           if (this.isEdit) {
@@ -844,7 +867,13 @@ export default {
         showClose: true,
         duration: 1000
       })
-      this.postForm.status = 'draft'
+    },
+    changePortEnable() {
+      if (this.postForm.service_ports_enable) {
+        this.addPort()
+      } else {
+        this.postForm.service_ports = []
+      }
     },
     addPort() {
       this.postForm.service_ports.push({
@@ -859,6 +888,16 @@ export default {
       if (index !== -1) {
         this.postForm.service_ports.splice(index, 1)
       }
+      if (this.postForm.service_ports.length === 0) {
+        this.postForm.service_ports_enable = false
+      }
+    },
+    changeEnvEnable() {
+      if (this.postForm.service_environment_enable) {
+        this.addEnv()
+      } else {
+        this.postForm.service_environment = []
+      }
     },
     addEnv() {
       this.postForm.service_environment.push({
@@ -871,6 +910,9 @@ export default {
       const index = this.postForm.service_environment.indexOf(item)
       if (index !== -1) {
         this.postForm.service_environment.splice(index, 1)
+      }
+      if (this.postForm.service_environment.length === 0) {
+        this.postForm.service_environment_enable = false
       }
     }
   }

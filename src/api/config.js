@@ -209,3 +209,34 @@ export function updateDB(id, data) {
     data
   })
 }
+
+export function getNaCOSList(query) {
+  return request({
+    url: '/config/nacoses',
+    method: 'get',
+    params: query
+  })
+}
+
+export function createNaCOS(data) {
+  return request({
+    url: '/config/nacoses',
+    method: 'post',
+    data
+  })
+}
+export function deleteNaCOS(id) {
+  return request({
+    url: `/config/nacos/${id}`,
+    method: 'delete'
+  })
+}
+
+export function updateNaCOS(id, data) {
+  return request({
+    url: `/config/nacos/${id}`,
+    method: 'put',
+    data
+  })
+}
+

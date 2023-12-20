@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input
-        v-model="listQuery.name"
+        v-model="listQuery.images"
         placeholder="Title"
         style="width: 200px"
         class="filter-item"
@@ -72,7 +72,7 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
         width="400px"
         class-name="small-padding fixed-width"
@@ -82,7 +82,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -124,14 +123,14 @@
           />
         </el-form-item>
         <el-form-item label="是否有效" prop="status">
-          <el-input
+          <el-switch
             v-model="temp.status"
             class="filter-item"
             placeholder="是否有效"
           />
         </el-form-item>
         <el-form-item label="是否部署" prop="install_status">
-          <el-input
+          <el-switch
             v-model="temp.install_status"
             class="filter-item"
             placeholder="是否部署"
@@ -147,22 +146,6 @@
           确认
         </el-button>
       </div>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
     </el-dialog>
   </div>
 </template>
@@ -190,22 +173,16 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
+        images: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
       showReviewer: false,
       temp: {
         id: undefined,
         name: '',
         images: '',
-        install_status: '',
-        status: ''
+        install_status: false,
+        status: false
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -213,22 +190,19 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         images: [
-          { required: true, message: 'images is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         status: [
-          { required: true, message: 'status is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ], install_status: [
-          { required: true, message: 'install_status is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {
@@ -275,7 +249,9 @@ export default {
       this.temp = {
         id: undefined,
         name: '',
-        images: ''
+        images: '',
+        install_status: false,
+        status: false
       }
     },
     handleCreate() {

@@ -1,23 +1,6 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input
-        v-model="listQuery.name"
-        placeholder="Title"
-        style="width: 200px"
-        class="filter-item"
-        @keyup.enter.native="handleFilter"
-      />
-      <el-button
-        v-waves
-        style="margin-left: 10px"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-search"
-        @click="handleFilter"
-      >
-        搜索
-      </el-button>
       <el-button
         class="filter-item"
         style="margin-left: 10px"
@@ -107,7 +90,7 @@
           />
         </el-form-item>
         <el-form-item label="是否可用" prop="enable">
-          <el-input
+          <el-switch
             v-model="temp.enable"
             class="filter-item"
             placeholder="是否可用"
@@ -123,22 +106,6 @@
           确认
         </el-button>
       </div>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
     </el-dialog>
   </div>
 </template>
@@ -167,19 +134,11 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
-      showReviewer: false,
       temp: {
         id: undefined,
-        enable: '',
+        enable: false,
         helm_repo_add_command: ''
       },
       dialogFormVisible: false,
@@ -188,14 +147,12 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         enable: [
-          { required: true, message: 'enable is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         helm_repo_add_command: [
-          { required: true, message: 'helm_repo_add_command is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -244,7 +201,7 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        name: '',
+        enable: false,
         helm_repo_add_command: ''
       }
     },

@@ -198,10 +198,10 @@ export default {
       pvData: [],
       rules: {
         environment: [
-          { required: true, message: 'environment is required', trigger: 'blur' }
+          { required: true, message: '字段必须填写', trigger: 'blur' }
         ],
         code: [
-          { required: true, message: 'code is required', trigger: 'blur' },
+          { required: true, message: '字段必须填写', trigger: 'blur' },
           { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号', trigger: 'blur' },
           { pattern: /[0-9a-zA-Z]{1,10}/, message: '只可以输入数字和字母', trigger: 'blur' },
