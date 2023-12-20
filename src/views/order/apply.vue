@@ -30,8 +30,8 @@
               >
                 <el-select v-model="suborder.content_type">
                   <el-option
-                    v-for="(content, index) in content_type"
-                    :key="index"
+                    v-for="(content, index1) in content_type"
+                    :key="index1"
                     :label="content.model.label"
                     :value="content.id"
                   />
@@ -46,8 +46,8 @@
               >
                 <el-select v-model="suborder.object_id">
                   <el-option
-                    v-for="(content, index) in suborder_select"
-                    :key="index"
+                    v-for="(content, index1) in suborder_select"
+                    :key="index1"
                     :label="content.rw_environment + ':' + content.db_type"
                     :value="content.id"
                   />
