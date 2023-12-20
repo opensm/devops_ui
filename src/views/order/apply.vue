@@ -29,17 +29,38 @@
                 @change="content_change()"
               >
                 <el-select v-model="suborder.content_type">
-                  <el-option v-for="(content, index) in content_type" :key="index" :label="content.model.label" :value="content.id" />
+                  <el-option
+                    v-for="(content, index) in content_type"
+                    :key="index"
+                    :label="content.model.label"
+                    :value="content.id"
+                  />
                 </el-select>
               </el-form-item>
               <el-form-item
                 :key="index"
-                :label="'对应配置：' + index"
+                :label="'关联配置：' + index"
                 :prop="'suborders.' + index + '.object_id'"
                 :rules="[{required: true, message: '对应配置不能为空', trigger: 'blur'}]"
+                @change="content_change()"
               >
-                <el-input-number v-model="suborder.object_id" :min="80" :max="65535" />
+                <el-select v-model="suborder.object_id">
+                  <el-option
+                    v-for="(content, index) in suborder_select"
+                    :key="index"
+                    :label="content.rw_environment + ':' + content.db_type"
+                    :value="content.id"
+                  />
+                </el-select>
               </el-form-item>
+<!--              <el-form-item-->
+<!--                :key="index"-->
+<!--                :label="'对应配置：' + index"-->
+<!--                :prop="'suborders.' + index + '.object_id'"-->
+<!--                :rules="[{required: true, message: '对应配置不能为空', trigger: 'blur'}]"-->
+<!--              >-->
+<!--                <el-input-number v-model="suborder.object_id" :min="80" :max="65535" />-->
+<!--              </el-form-item>-->
               <el-form-item
                 :key="index"
                 :label="'强制执行：' + index"
