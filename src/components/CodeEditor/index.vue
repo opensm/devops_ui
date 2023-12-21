@@ -1,6 +1,11 @@
 <template>
   <div class="in-coder-panel">
-    <el-select v-model="cmMode" v-if="showChangemode" class="code-mode-select" @change="changeMode">
+    <el-select
+      v-if="showChangemode"
+      v-model="cmMode"
+      class="code-mode-select"
+      @change="changeMode"
+    >
       <!-- <el-select v-model="cmMode" class="code-mode-select"> -->
       <el-option v-for="ssss in modes" :key="ssss.value" :label="ssss.label" :value="ssss.value" />
     </el-select>
@@ -18,8 +23,10 @@
 </template>
 
 <script>
+// import { VueCodemirror } from 'vue-codemirror'
 import { codemirror } from 'vue-codemirror'
 // const CodeMirror = codemirror
+// const codemirror = VueCodemirror
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/keymap/sublime'
 import 'codemirror/keymap/vim'
@@ -31,7 +38,6 @@ import 'codemirror/mode/css/css.js'
 import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/mode/sql/sql.js'
 import 'codemirror/mode/python/python.js'
-// import 'codemirror/mode/python/python.js'
 import 'codemirror/mode/markdown/markdown.js'
 import 'codemirror/addon/hint/show-hint.css'
 import 'codemirror/addon/hint/show-hint.js'
@@ -70,7 +76,6 @@ import 'codemirror/addon/search/search.js'
 import 'codemirror/addon/display/autorefresh.js'
 import 'codemirror/addon/selection/mark-selection.js'
 import 'codemirror/addon/search/match-highlighter.js'
-
 import 'codemirror/addon/scroll/simplescrollbars.css'
 import 'codemirror/addon/scroll/simplescrollbars'
 
@@ -148,7 +153,7 @@ export default {
       type: String,
       default: '3024-night'
     },
-    showChangemode:{
+    showChangemode: {
       type: Boolean,
       default: true
     },
@@ -257,7 +262,7 @@ export default {
       console.log(val)
       // this.coder.setOption('mode', `text/${val}`)
       // this.cmOptions.mode = `text/${val}`
-      this.$set(this.cmOptions,'mode',val)
+      this.$set(this.cmOptions, 'mode', val)
       // 获取修改后的语法
       // const label = this._getLanguage(val).label.toLowerCase()
 
@@ -279,9 +284,13 @@ export default {
       })
     },
     onCmCodeChanges(cm) {
+      debugger
       this.editorValue1 = cm.getValue()
+      debugger
       this.$emit('update:editorValue', this.editorValue1)
+      debugger
       this.resetLint()
+      debugger
     },
     resetLint() {
       console.log(this.$refs.myCm.codemirror.getValue())

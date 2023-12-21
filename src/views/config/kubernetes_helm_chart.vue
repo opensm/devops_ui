@@ -41,7 +41,7 @@
       </el-table-column>
       <el-table-column label="helm仓库" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.helm_repo }}</span>
+          <span>{{ row.rw_helm_repo }}</span>
         </template>
       </el-table-column>
       <el-table-column label="helm版本" width="auto" align="center">
@@ -99,11 +99,14 @@
           />
         </el-form-item>
         <el-form-item label="helm仓库" prop="helm_repo">
-          <el-input
-            v-model="temp.helm_repo"
-            class="filter-item"
-            placeholder="helm仓库"
-          />
+          <el-select v-model="temp.helm_repo" placeholder="helm仓库">
+            <el-option
+              v-for="(repo, index) in repoList"
+              :key="index"
+              :value="repo.id"
+              :label="repo.name"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="helm版本" prop="helm_repo_chart_version">
           <el-input
@@ -136,7 +139,8 @@ import {
   getKubernetesHelmChartList,
   createKubernetesHelmChart,
   updateKubernetesHelmChart,
-  deleteKubernetesHelmChart
+  deleteKubernetesHelmChart,
+  getKubernetesHelmRepoList
 } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
@@ -152,6 +156,7 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      repoList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -188,11 +193,17 @@ export default {
   },
   created() {
     this.getList()
+    this.getHelmRepoList()
   },
   methods: {
+    getHelmRepoList(){
+      getKubernetesHelmRepoList().then(response =>{
+        this.repoList = response.data
+      })
+    },
     getList() {
       this.listLoading = true
-      getKubernetesHelmChartList(this.listQuery).then((response) => {
+      getKubernetesHelmChartList(this.listQuery).then(response => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request

@@ -34,6 +34,11 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="仓库名称" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.name }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="helm repo配置命令" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.helm_repo_add_command }}</span>
@@ -41,7 +46,8 @@
       </el-table-column>
       <el-table-column label="是否可用" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.enable }}</span>
+          <span v-if="row.enable">是</span>
+          <span v-else>否</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -82,9 +88,18 @@
         label-width="190px"
         style="width: 400px; margin-left: 50px"
       >
+        <el-form-item label="仓库名称" prop="name">
+          <el-input
+            v-model="temp.name"
+            type="textarea"
+            class="filter-item"
+            placeholder="仓库名称"
+          />
+        </el-form-item>
         <el-form-item label="helm repo配置命令" prop="helm_repo_add_command">
           <el-input
             v-model="temp.helm_repo_add_command"
+            type="textarea"
             class="filter-item"
             placeholder="helm repo配置命令"
           />
@@ -138,6 +153,7 @@ export default {
       },
       temp: {
         id: undefined,
+        name: '',
         enable: false,
         helm_repo_add_command: ''
       },
@@ -148,14 +164,16 @@ export default {
         create: '新增'
       },
       rules: {
+        name: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
         enable: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
         helm_repo_add_command: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {

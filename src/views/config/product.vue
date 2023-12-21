@@ -108,7 +108,7 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="部署服务" prop="name">
+        <el-form-item label="部署服务" prop="service_environment">
           <el-input
             v-model="temp.service_environment"
             class="filter-item"
@@ -179,7 +179,7 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        name: '',
+        service_environment: '',
         images: '',
         install_status: false,
         status: false
@@ -191,7 +191,7 @@ export default {
         create: '新增'
       },
       rules: {
-        name: [
+        service_environment: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
         images: [
