@@ -33,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      :border="true"
+      border
       fit
       highlight-current-row
       style="width: 100%"
@@ -51,29 +51,14 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="所属环境" width="auto" align="center">
+      <el-table-column label="通知类型" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.rw_environment }}</span>
+          <span>{{ row.notice_type }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="地址" width="auto" align="center">
+      <el-table-column label="参数" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.address }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="协议" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.protocol }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="用户" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.username }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.desc }}</span>
+          <span>{{ row.params }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -86,6 +71,7 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
+
           <el-button
             size="mini"
             type="danger"
@@ -113,41 +99,17 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="所属环境" prop="environment">
-          <el-select v-model="temp.environment">
-            <el-option
-              v-for="(item, index ) in selectList"
-              :label="item.environment"
-              :value="item.id"
-              :key="index"
-            />
+        <el-form-item label="通知类型" prop="notice_type">
+          <el-select v-model="temp.notice_type">
+            <el-option value="dingding" label="钉钉机器人" />
+            <el-option value="wechat" label="企业微信机器人" />
           </el-select>
         </el-form-item>
-        <el-form-item label="协议" prop="protocol">
-          <el-radio-group v-model="temp.protocol">
-            <el-radio-button label="http" />
-            <el-radio-button label="grpc" />
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="地址" prop="address">
+        <el-form-item label="通知参数" prop="params">
           <el-input
-            v-model="temp.address"
+            v-model="temp.params"
             class="filter-item"
-            placeholder="链接地址"
-          />
-        </el-form-item>
-        <el-form-item label="用户" prop="username">
-          <el-input
-            v-model="temp.username"
-            class="filter-item"
-            placeholder="用户"
-          />
-        </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input
-            v-model="temp.password"
-            class="filter-item"
-            placeholder="密码"
+            placeholder="通知参数"
           />
         </el-form-item>
       </el-form>
@@ -161,23 +123,20 @@
         </el-button>
       </div>
     </el-dialog>
+
   </div>
 </template>
 <script>
 import {
-  getNaCOSList,
-  createNaCOS,
-  updateNaCOS,
-  deleteNaCOS
+  getNoticeList,
+  createNotice,
+  updateNotice,
+  deleteNotice
 } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
-import { getEnvironmentList } from '@/api/environment'
 import Pagination from '@/components/Pagination'
-import { enSecret } from '@/utils/secret'
-import store from "@/store";
-import { mapGetters } from "vuex";
 export default {
-  name: 'ComplexTable',
+  notice_type: 'ComplexTable',
   components: {
     Pagination
   },
@@ -187,8 +146,8 @@ export default {
       tableKey: 0,
       list: null,
       total: 0,
-      selectList: [],
       listLoading: true,
+      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -196,11 +155,8 @@ export default {
       },
       temp: {
         id: undefined,
-        protocol: 'http',
-        address: '',
-        password: '',
-        username: '',
-        environment: ''
+        notice_type: '',
+        params: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -209,19 +165,10 @@ export default {
         create: '新增'
       },
       rules: {
-        protocol: [
+        notice_type: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
-        address: [
-          { required: true, message: '字段必填', trigger: 'blur' }
-        ],
-        username: [
-          { required: true, message: '字段必填', trigger: 'blur' }
-        ],
-        password: [
-          { required: true, message: '字段必填', trigger: 'blur' }
-        ],
-        environment: [
+        params: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ]
       }
@@ -229,22 +176,11 @@ export default {
   },
   created() {
     this.getList()
-    this.getEnvironmentList()
-  },
-  computed: {
-    ...mapGetters([
-      'publickey'
-    ])
   },
   methods: {
-    getEnvironmentList() {
-      getEnvironmentList().then(response => {
-        this.selectList = response.data
-      })
-    },
     getList() {
       this.listLoading = true
-      getNaCOSList(this.listQuery).then((response) => {
+      getNoticeList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -273,11 +209,9 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        protocol: 'http',
-        address: '',
-        password: '',
-        username: '',
-        environment: ''
+        id: undefined,
+        notice_type: '',
+        params: ''
       }
     },
     handleCreate() {
@@ -291,8 +225,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.password = enSecret(this.temp.password, store.getters.publickey)
-          createNaCOS(this.temp).then(response => {
+          createNotice(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -308,7 +241,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -319,8 +251,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.password = enSecret(tempData.password, store.getters.publickey)
-          updateNaCOS(tempData.id, tempData).then(response => {
+          updateNotice(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -335,7 +266,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteNaCOS(row.id).then(response => {
+      deleteNotice(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({
@@ -357,9 +288,6 @@ export default {
 </script>
 <style>
 .el-select {
-  width: 100%;
-}
-.el-radio-group {
   width: 100%;
 }
 </style>

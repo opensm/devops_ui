@@ -53,55 +53,40 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="服务名称" width="150%" align="center">
+      <el-table-column label="Jira任务单" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.service_name }}</span>
+          <span>{{ row.jira_order }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="代码仓库地址" width="300%" align="center">
+      <el-table-column label="执行时间" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.service_git }}</span>
+          <span>{{ row.order_time }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="默认编译命令" width="400%" align="center">
+      <el-table-column label="创建时间" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.service_compile }}</span>
+          <span>{{ row.create_time }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="端口启用" width="100px" align="center">
+      <el-table-column label="状态" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span v-if="row.service_ports_enable">有</span>
+          <el-tag v-if="row.status === 0">还未审批</el-tag>
+          <el-tag v-if="row.status === 1" type="warning">审批中</el-tag>
+          <el-tag v-if="row.status === 2" type="success">审批通过</el-tag>
+          <el-tag v-if="row.status === 3" type="danger">审批拒绝</el-tag>
+          <el-tag v-if="row.status === 4" type="info">审批未执行</el-tag>
+          <el-tag v-if="row.status === 5" type="warning">执行中</el-tag>
+          <el-tag v-if="row.status === 6" type="success">执行完成</el-tag>
+          <el-tag v-if="row.status === 7" type="danger">执行失败</el-tag>
+          <el-tag v-if="row.status === 8" type="warning">任务回退中</el-tag>
+          <el-tag v-if="row.status === 9" type="danger">任务回退失败</el-tag>
+          <el-tag v-if="row.status === 10" type="warning">任务取消</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="完成时间" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span v-if="row.finish_time">有</span>
           <span v-else>无</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="环境变量" width="100px" align="center">
-        <template slot-scope="{ row }">
-          <span v-if="row.service_environment_enable">有</span>
-          <span v-else>无</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="健康检查" width="100px" align="center">
-        <template slot-scope="{ row }">
-          <span v-if="row.service_healthy_enable">是</span>
-          <span v-else>否</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="监控启用" width="100px" align="center">
-        <template slot-scope="{ row }">
-          <span v-if="row.service_prometheus_enable">是</span>
-          <span v-else>否</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="域名启用" width="100px" align="center">
-        <template slot-scope="{ row }">
-          <span v-if="row.service_domain_enable">是</span>
-          <span v-else>否</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="skywalking启用" width="100px" align="center">
-        <template slot-scope="{ row }">
-          <span v-if="row.service_skywalking_enable">是</span>
-          <span v-else>否</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -111,7 +96,7 @@
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row, $index }">
-          <router-link :to="'service_edit/'+row.id">
+          <router-link :to="'detail/'+row.id">
             <el-button type="primary" size="medium" icon="el-icon-edit" style="margin-bottom: 10px;">
               详情
             </el-button>
@@ -120,6 +105,7 @@
             size="medium"
             type="danger"
             icon="el-icon-delete"
+            :disabled="row.status > 0 "
             @click="handleDelete(row, $index)"
           >
             删除
@@ -138,9 +124,9 @@
 </template>
 <script>
 import {
-  getServiceList,
-  deleteService
-} from '@/api/service'
+  getOrderList,
+  deleteOrder
+} from '@/api/order'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -155,38 +141,22 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
-      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
-        title: undefined,
-        type: undefined,
+        desc: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
-      showReviewer: false,
       temp: {
         id: undefined,
-        service_name: '',
-        service_ports_enable: false,
-        service_ports: {},
-        service_config: [],
-        service_git: '',
-        service_compile: 'clean package -Dmaven.test.skip=true',
-        service_environment_enable: false,
-        service_environment: {},
-        service_healthy_enable: false,
-        service_readiness: {},
-        service_liveness: {},
-        service_prometheus_enable: false,
-        service_prometheus: {},
-        service_domain_enable: false,
-        service_domain: {},
-        service_skywalking_enable: false,
-        service_skywalking: {}
+        jira_order: '',
+        notice: [],
+        re_orders: false,
+        desc: false,
+        status: false,
+        order_time: {},
+        create_time: [],
+        finish_time: ''
       }
     }
   },
@@ -196,7 +166,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getServiceList(this.listQuery).then((response) => {
+      getOrderList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -226,27 +196,18 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        service_name: '',
-        service_ports_enable: false,
-        service_ports: {},
-        service_config: [],
-        service_git: '',
-        service_compile: 'clean package -Dmaven.test.skip=true',
-        service_environment_enable: false,
-        service_environment: {},
-        service_healthy: false,
-        service_readiness: {},
-        service_liveness: {},
-        service_prometheus_enable: false,
-        service_prometheus: {},
-        service_domain_enable: false,
-        service_domain: {},
-        service_skywalking_enable: false,
-        service_skywalking: {}
+        jira_order: '',
+        notice: [],
+        re_orders: false,
+        desc: false,
+        status: false,
+        order_time: {},
+        create_time: [],
+        finish_time: ''
       }
     },
     handleDelete(row) {
-      deleteService(row.id).then(response => {
+      deleteOrder(row.id).then(response => {
         const { message, code } = response
         this.$notify({
           title: '成功',

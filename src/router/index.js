@@ -322,6 +322,16 @@ export const asyncRoutes = [
           icon: 'el-icon-pie-chart',
           roles: ['admin', 'manager', 'project-manager']
         }
+      },
+      {
+        path: 'notice',
+        name: 'notice',
+        component: () => import('@/views/config/notice'),
+        meta: {
+          title: '通知',
+          icon: 'el-icon-s-comment',
+          roles: ['admin', 'manager', 'project-manager']
+        }
       }
     ]
   },
@@ -330,19 +340,43 @@ export const asyncRoutes = [
     component: Layout,
     meta: {
       title: '工单管理',
-      icon: 'form',
+      icon: 'el-icon-s-ticket',
       roles: ['admin', 'project-user']
     },
     children: [
       {
         path: 'list',
         name: 'order',
-        component: () => import('@/views/order/list'),
+        component: () => import('@/views/order/order'),
         meta: {
           title: '我的工单',
-          icon: 'form',
+          icon: 'el-icon-user',
           roles: ['admin', 'project-user']
         }
+      },
+      {
+        path: 'edit/:id(\\d+)',
+        component: () => import('@/views/order/edit.vue'),
+        name: '编辑工单',
+        meta: {
+          title: '编辑工单',
+          noCache: true,
+          activeMenu: '/order/order',
+          roles: ['admin', 'manager', 'project-manager']
+        },
+        hidden: true
+      },
+      {
+        path: 'detail/:id(\\d+)',
+        component: () => import('@/views/order/detail.vue'),
+        name: '工单详情',
+        meta: {
+          title: '工单详情',
+          noCache: true,
+          activeMenu: '/order/detail',
+          roles: ['admin', 'manager', 'project-manager']
+        },
+        hidden: true
       },
       {
         path: 'apply',
@@ -350,7 +384,7 @@ export const asyncRoutes = [
         component: () => import('@/views/order/apply'),
         meta: {
           title: '申请工单',
-          icon: 'form',
+          icon: 'el-icon-circle-plus-outline',
           roles: ['admin', 'project-user']
         }
       },
@@ -360,7 +394,7 @@ export const asyncRoutes = [
         component: () => import('@/views/order/verify'),
         meta: {
           title: '工单审核',
-          icon: 'form',
+          icon: 'el-icon-s-custom',
           roles: ['admin', 'project-user']
         }
       }
@@ -386,11 +420,113 @@ export const asyncRoutes = [
         }
       },
       {
-        path: 'index',
-        name: 'jira',
+        path: 'version',
+        name: '版本',
         component: () => import('@/views/form/index'),
         meta: {
           title: 'jira版本管理',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      }
+    ]
+  },
+  {
+    path: '/ldap',
+    component: Layout,
+    meta: {
+      title: 'AD/LDAP管理',
+      icon: 'form',
+      roles: ['admin', 'project-approve']
+    },
+    children: [
+      {
+        path: 'account',
+        name: 'account',
+        component: () => import('@/views/form/index'),
+        meta: {
+          title: '账号管理',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'tree',
+        name: 'tree',
+        component: () => import('@/views/form/index'),
+        meta: {
+          title: '组织管理',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'apply',
+        name: 'apply',
+        component: () => import('@/views/form/index'),
+        meta: {
+          title: '申请处理',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      }
+    ]
+  },
+  {
+    path: '/ldap',
+    component: Layout,
+    meta: {
+      title: '资产管理',
+      icon: 'form',
+      roles: ['admin', 'project-approve']
+    },
+    children: [
+      {
+        path: 'monitor',
+        name: 'monitor',
+        component: () => import('@/views/form/index'),
+        meta: {
+          title: '监控情况',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'init',
+        name: 'init',
+        component: () => import('@/views/form/index'),
+        meta: {
+          title: '初始化情况',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'jumpserver',
+        name: 'jumpserver',
+        component: () => import('@/views/form/index'),
+        meta: {
+          title: '跳板机',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'cloud',
+        name: 'cloud',
+        component: () => import('@/views/form/index'),
+        meta: {
+          title: '云资源',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'info',
+        name: 'info',
+        component: () => import('@/views/form/index'),
+        meta: {
+          title: '综合展示',
           icon: 'form',
           roles: ['admin', 'project-user']
         }

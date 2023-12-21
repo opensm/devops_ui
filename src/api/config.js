@@ -210,6 +210,36 @@ export function updateDB(id, data) {
   })
 }
 
+export function getNoticeList(query) {
+  return request({
+    url: '/config/notices',
+    method: 'get',
+    params: query
+  })
+}
+
+export function createNotice(data) {
+  return request({
+    url: '/config/notices',
+    method: 'post',
+    data
+  })
+}
+export function deleteNotice(id) {
+  return request({
+    url: `/config/notice/${id}`,
+    method: 'delete'
+  })
+}
+
+export function updateNotice(id, data) {
+  return request({
+    url: `/config/notice/${id}`,
+    method: 'put',
+    data
+  })
+}
+
 export function getNaCOSList(query) {
   return request({
     url: '/config/nacoses',

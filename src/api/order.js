@@ -16,6 +16,13 @@ export function getOrderList(query) {
   })
 }
 
+export function getOrder(id) {
+  return request({
+    url: `/order/order/${id}`,
+    method: 'get'
+  })
+}
+
 export function createOrder(data) {
   return request({
     url: '/order/orders',
@@ -33,36 +40,6 @@ export function deleteOrder(id) {
 export function updateOrder(id, data) {
   return request({
     url: `/order/order/${id}`,
-    method: 'put',
-    data
-  })
-}
-
-export function getNoticeList(query) {
-  return request({
-    url: '/order/notices',
-    method: 'get',
-    params: query
-  })
-}
-
-export function createNotice(data) {
-  return request({
-    url: '/order/notices',
-    method: 'post',
-    data
-  })
-}
-export function deleteNotice(id) {
-  return request({
-    url: `/order/notice/${id}`,
-    method: 'delete'
-  })
-}
-
-export function updateNotice(id, data) {
-  return request({
-    url: `/order/notice/${id}`,
     method: 'put',
     data
   })

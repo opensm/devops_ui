@@ -78,7 +78,7 @@ service.interceptors.response.use(
           })
         })
       }
-      return Promise.reject(new Error('登录失败，请检查！' || 'Error'))
+      return Promise.reject(new Error('请求错误！' || 'Error'))
     } else {
       // Message({
       //   message: message || '操作成功！',
