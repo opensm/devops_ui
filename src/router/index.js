@@ -473,7 +473,7 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/ldap',
+    path: '/cmdb',
     component: Layout,
     meta: {
       title: '资产管理',
