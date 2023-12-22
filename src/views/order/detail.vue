@@ -97,6 +97,21 @@
         </el-descriptions-item>
       </el-descriptions>
     </div>
+
+    <div class="app-container background-log">
+      <el-descriptions class="margin-top" title="日志信息" :column="1" border>
+      </el-descriptions>
+      <el-timeline reverse="true">
+        <el-timeline-item
+          v-for="(activity, index) in dataForm.order_logs"
+          :key="index"
+          color='#0bbd87'
+          :timestamp="activity.create_time">
+          {{ activity.logs }}
+        </el-timeline-item>
+      </el-timeline>
+
+    </div>
   </div>
 </template>
 
@@ -146,6 +161,15 @@ export default {
   margin-top: 10px;
   /*background-color: #409EFF;*/
   background: linear-gradient(to bottom right, #f1b531,#e6ebf5);
+  color: #e6ebf5;
+  overflow: hidden;
+}
+.background-log {
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  margin-top: 10px;
+  /*background-color: #409EFF;*/
+  background: linear-gradient(to bottom right, #f5b3f3,#e6ebf5);
   color: #e6ebf5;
   overflow: hidden;
 }

@@ -63,11 +63,6 @@
           <span>{{ row.order_time }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.create_time }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="状态" width="auto" align="center">
         <template slot-scope="{ row }">
           <el-tag v-if="row.status === 0">还未审批</el-tag>
@@ -89,6 +84,11 @@
           <span v-else>无</span>
         </template>
       </el-table-column>
+      <el-table-column label="提交人" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.order_user }}</span>
+        </template>
+      </el-table-column>
       <el-table-column
         label="操作"
         align="center"
@@ -97,18 +97,16 @@
       >
         <template slot-scope="{ row, $index }">
           <router-link :to="'detail/'+row.id">
-            <el-button type="primary" size="medium" icon="el-icon-edit" style="margin-bottom: 10px;">
-              详情
+            <el-button type="primary" size="mini" icon="el-icon-edit" style="margin-bottom: 10px;">
             </el-button>
           </router-link>
           <el-button
-            size="medium"
+            size="mini"
             type="danger"
             icon="el-icon-delete"
             :disabled="row.status > 0 "
             @click="handleDelete(row, $index)"
           >
-            删除
           </el-button>
         </template>
       </el-table-column>

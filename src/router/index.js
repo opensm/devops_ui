@@ -294,6 +294,18 @@ export const asyncRoutes = [
         }
       },
       {
+        path: 'product_view/:id(\\d+)',
+        component: () => import('@/views/config/product_view'),
+        name: '查看制品情况',
+        meta: {
+          title: '查看制品情况',
+          noCache: true,
+          activeMenu: '/config/product',
+          roles: ['admin', 'manager', 'project-manager']
+        },
+        hidden: true
+      },
+      {
         path: 'db',
         name: 'db',
         component: () => import('@/views/config/db'),

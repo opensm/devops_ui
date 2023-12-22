@@ -51,11 +51,6 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="部署服务" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.service_environment }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="镜像地址" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.images }}</span>
@@ -63,12 +58,14 @@
       </el-table-column>
       <el-table-column label="是否有效" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.status }}</span>
+          <span v-if="row.status">是</span>
+          <span v-else>否</span>
         </template>
       </el-table-column>
       <el-table-column label="是否部署" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.install_status }}</span>
+          <span v-if="row.install_status">是</span>
+          <span v-else>否</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -78,6 +75,11 @@
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row, $index }">
+          <router-link :to="'product_view/' + row.id">
+            <el-button type="success" size="mini" style="margin-right: 10px">
+              部署情况
+            </el-button>
+          </router-link>
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
