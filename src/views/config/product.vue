@@ -110,9 +110,9 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="部署服务" prop="service_environment">
+        <el-form-item label="部署服务" prop="service">
           <el-input
-            v-model="temp.service_environment"
+            v-model="temp.service"
             class="filter-item"
             placeholder="部署服务"
           />
@@ -181,10 +181,10 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        service_environment: '',
         images: '',
         install_status: false,
-        status: false
+        status: false,
+        service: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -193,7 +193,7 @@ export default {
         create: '新增'
       },
       rules: {
-        service_environment: [
+        service: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
         images: [
