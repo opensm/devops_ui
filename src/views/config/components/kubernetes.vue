@@ -115,7 +115,11 @@ export default {
   },
   computed: {
     contentShortLength() {
-      return this.postForm.kubeconfig.length
+      if (this.postForm.kubeconfig){
+        return this.postForm.kubeconfig.length
+      } else {
+        return 0
+      }
     }
   },
   created() {

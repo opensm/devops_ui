@@ -32,7 +32,8 @@
       </el-table-column>
       <el-table-column label="debug" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.debug }}</span>
+          <el-tag v-if="row.debug">是</el-tag>
+          <el-tag v-else>否</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="备注" width="auto" align="center">
@@ -40,15 +41,6 @@
           <span>{{ row.desc }}</span>
         </template>
       </el-table-column>
-      <!-- <el-table-column align="center" label="编辑" width="120">
-        <template slot-scope="scope">
-          <router-link :to="'kubernets_edit/'+scope.row.id">
-            <el-button type="primary" size="medium" icon="el-icon-edit">
-              编辑
-            </el-button>
-          </router-link>
-        </template>
-      </el-table-column> -->
       <el-table-column
         label="删除"
         align="center"
