@@ -79,7 +79,7 @@ const defaultForm = {
   name: '', // 文章题目
   kubeconfig: '', // 文章内容
   regular: '', // 文章摘要
-  debug: '', // 文章外链
+  debug: false, // 文章外链
   desc: '' // 文章图片
 }
 
@@ -115,7 +115,7 @@ export default {
   },
   computed: {
     contentShortLength() {
-      if (this.postForm.kubeconfig){
+      if (this.postForm.kubeconfig) {
         return this.postForm.kubeconfig.length
       } else {
         return 0

@@ -200,6 +200,16 @@ export const asyncRoutes = [
         }
       },
       {
+        path: 'environment_variable',
+        name: 'environment_variable',
+        component: () => import('@/views/config/environment_variable'),
+        meta: {
+          title: '环境变量',
+          icon: 'el-icon-notebook-1',
+          roles: ['admin', 'manager', 'project-manager']
+        }
+      },
+      {
         path: 'service_edit/:id(\\d+)',
         component: () => import('@/views/config/service_edit'),
         name: '编辑服务',

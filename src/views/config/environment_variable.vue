@@ -1,6 +1,23 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
+      <el-input
+        v-model="listQuery.name"
+        placeholder="Title"
+        style="width: 200px"
+        class="filter-item"
+        @keyup.enter.native="handleFilter"
+      />
+      <el-button
+        v-waves
+        style="margin-left: 10px"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-search"
+        @click="handleFilter"
+      >
+        搜索
+      </el-button>
       <el-button
         class="filter-item"
         style="margin-left: 10px"
@@ -16,7 +33,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      :border="true"
+      border
       fit
       highlight-current-row
       style="width: 100%"
@@ -34,24 +51,18 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="仓库名称" width="auto" align="center">
+      <el-table-column label="环境变量Key" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.config_key }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="helm repo配置命令" width="auto" align="center">
+      <el-table-column label="环境变量value" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.helm_repo_add_command }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="是否可用" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span v-if="row.enable">是</span>
-          <span v-else>否</span>
+          <span>{{ row.config_value }}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
         width="400px"
         class-name="small-padding fixed-width"
@@ -60,8 +71,8 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
+
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -85,30 +96,28 @@
         :rules="rules"
         :model="temp"
         label-position="left"
-        label-width="190px"
+        label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="仓库名称" prop="name">
+        <el-form-item label="环境变量Key" prop="config_key">
           <el-input
-            v-model="temp.name"
+            v-model="temp.config_key"
             class="filter-item"
-            placeholder="仓库名称"
+            placeholder="环境变量Key"
           />
         </el-form-item>
-        <el-form-item label="helm repo配置命令" prop="helm_repo_add_command">
+        <el-form-item label="环境变量value" prop="config_value">
           <el-input
-            v-model="temp.helm_repo_add_command"
-            type="textarea"
+            v-model="temp.config_value"
             class="filter-item"
-            placeholder="helm repo配置命令"
+            placeholder="环境变量value"
           />
         </el-form-item>
-        <el-form-item label="是否可用" prop="enable">
-          <el-switch
-            v-model="temp.enable"
-            class="filter-item"
-            placeholder="是否可用"
-          />
+        <el-form-item label="配置类型" prop="config_type">
+          <el-select v-model="temp.config_type">
+            <el-option value="secret" label="密文" />
+            <el-option value="config" label="配置" />
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -121,14 +130,15 @@
         </el-button>
       </div>
     </el-dialog>
+
   </div>
 </template>
 <script>
 import {
-  getKubernetesHelmRepoList,
-  createKubernetesHelmRepo,
-  updateKubernetesHelmRepo,
-  deleteKubernetesHelmRepo
+  getEnvironmentVariables,
+  createEnvironmentVariable,
+  updateEnvironmentVariable,
+  deleteEnvironmentVariable
 } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
@@ -152,9 +162,9 @@ export default {
       },
       temp: {
         id: undefined,
-        name: '',
-        enable: false,
-        helm_repo_add_command: ''
+        config_key: '',
+        config_type: '',
+        config_value: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -163,13 +173,13 @@ export default {
         create: '新增'
       },
       rules: {
-        name: [
+        config_type: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
-        enable: [
+        config_value: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
-        helm_repo_add_command: [
+        config_key: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ]
       }
@@ -181,7 +191,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getKubernetesHelmRepoList(this.listQuery).then((response) => {
+      getEnvironmentVariables(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -193,13 +203,6 @@ export default {
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
-      row.status = status
     },
     sortChange(data) {
       const { prop, order } = data
@@ -218,8 +221,9 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        enable: false,
-        helm_repo_add_command: ''
+        config_key: '',
+        config_type: '',
+        config_value: ''
       }
     },
     handleCreate() {
@@ -233,7 +237,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createKubernetesHelmRepo(this.temp).then(response => {
+          createEnvironmentVariable(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -249,7 +253,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -260,7 +263,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateKubernetesHelmRepo(tempData.id, tempData).then(response => {
+          updateEnvironmentVariable(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
             this.$notify({
@@ -275,7 +278,7 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteKubernetesHelmRepo(row.id).then(response => {
+      deleteEnvironmentVariable(row.id).then(response => {
         const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({
@@ -295,3 +298,8 @@ export default {
   }
 }
 </script>
+<style>
+.el-select {
+  width: 100%;
+}
+</style>

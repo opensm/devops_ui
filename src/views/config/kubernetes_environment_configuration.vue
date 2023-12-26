@@ -56,11 +56,6 @@
           <span>{{ row.kubernetes_pull_secret }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="副本数" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.kubernetes_replica_count }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="关联k8s认证信息" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.rw_kubernetes_auth }}</span>
@@ -82,7 +77,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -116,17 +110,14 @@
             placeholder="Harbor配置"
           />
         </el-form-item>
-        <el-form-item label="副本数" prop="kubernetes_replica_count">
-          <el-input-number
-            v-model="temp.kubernetes_replica_count"
-            class="filter-item"
-            placeholder="副本数"
-            :min="1"
-          />
-        </el-form-item>
         <el-form-item label="认证信息" prop="kubernetes_auth">
-          <el-select v-for="(k8s) in selectList" :key="k8s.id" v-model="temp.kubernetes_auth">
-            <el-option :value="k8s.id" :label="k8s.name">{{ k8s.name }}</el-option>
+          <el-select v-model="temp.kubernetes_auth">
+            <el-option
+              v-for="(k8s) in selectList"
+              :key="k8s.id"
+              :value="k8s.id"
+              :label="k8s.name"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="命名空间" prop="kubernetes_namespace">

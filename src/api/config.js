@@ -276,3 +276,32 @@ export function updateNaCOS(id, data) {
   })
 }
 
+export function getEnvironmentVariables(query) {
+  return request({
+    url: '/config/environment_variables',
+    method: 'get',
+    params: query
+  })
+}
+
+export function createEnvironmentVariable(data) {
+  return request({
+    url: '/config/environment_variables',
+    method: 'post',
+    data
+  })
+}
+export function deleteEnvironmentVariable(id) {
+  return request({
+    url: `/config/environment_variable/${id}`,
+    method: 'delete'
+  })
+}
+
+export function updateEnvironmentVariable(id, data) {
+  return request({
+    url: `/config/environment_variable/${id}`,
+    method: 'put',
+    data
+  })
+}

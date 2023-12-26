@@ -125,17 +125,14 @@
         label-width="140px"
         style="width: 400px; margin-left: 50px"
       >
-
-        <el-form-item label="关联服务" prop="service">
-          <el-select v-model="temp.service">
+        <el-form-item label="关联项目" prop="project">
+          <el-select v-model="temp.project">
             <el-option
-              v-for="svc in selectList7"
-              :key="svc.id"
-              :value="svc.id"
-              :label="svc.service_name"
-            >
-              {{ svc.service_name }}
-            </el-option>
+              v-for="config in selectList1"
+              :key="config.id"
+              :value="config.id"
+              :label="config.name"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="所属环境" prop="environment">
@@ -145,16 +142,42 @@
               :key="env.id"
               :value="env.id"
               :label="env.environment"
-            >
-              {{ env.environment }}
-            </el-option>
+            />
           </el-select>
+        </el-form-item>
+        <el-form-item label="关联服务" prop="service">
+          <el-select v-model="temp.service">
+            <el-option
+              v-for="svc in selectList7"
+              :key="svc.id"
+              :value="svc.id"
+              :label="svc.service_name"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="副本数" prop="replica_count">
+          <el-input-number v-model="temp.replica_count" />
         </el-form-item>
         <el-form-item label="资源" prop="resource">
           <el-select v-model="temp.resource">
-            <el-option v-for="resource in selectList5" :key="resource.id" :value="resource.id" :label="'需求 CPU:' + resource.request_cpu + 'm/内存:' + resource.request_memory + 'MB, 限制 CPU:' + resource.limit_cpu + 'm/内存:' + resource.limit_memory + 'MB'">
+            <el-option
+              v-for="resource in selectList5"
+              :key="resource.id"
+              :value="resource.id"
+              :label="'需求 CPU:' + resource.request_cpu + 'm/内存:' + resource.request_memory + 'MB, 限制 CPU:' + resource.limit_cpu + 'm/内存:' + resource.limit_memory + 'MB'"
+            >
               需求 CPU:{{ resource.request_cpu }}m/内存:{{ resource.request_memory }}MB, 限制 CPU:{{ resource.limit_cpu }}m/内存:{{ resource.limit_memory }}MB
             </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="环境变量" prop="environment_variable">
+          <el-select v-model="temp.environment_variable" multiple clearable>
+            <el-option
+              v-for="config in selectList8"
+              :key="config.id"
+              :value="config.id"
+              :label="config.config_key"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="配置文件" prop="service_config">
@@ -164,9 +187,7 @@
               :key="config.id"
               :value="config.id"
               :label="config.service_name"
-            >
-              {{ config.service_name }}
-            </el-option>
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="是否部署在k8s" prop="kubernetes_enable">
@@ -190,9 +211,7 @@
               :key="config.id"
               :label="config.kubernetes_namespace"
               :value="config.id"
-            >
-              {{ config.kubernetes_namespace }}
-            </el-option>
+            />
           </el-select>
         </el-form-item>
         <el-form-item v-if="! temp.kubernetes_enable" label="是否部署在docker" prop="docker_enable">
@@ -225,11 +244,6 @@
             placeholder="所用分支"
           />
         </el-form-item>
-        <el-form-item label="关联项目" prop="project">
-          <el-select v-model="temp.project">
-            <el-option v-for="config in selectList1" :key="config.id" :value="config.id" :label="config.name"> {{ config.name }}</el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item label="自动部署？" prop="auto_deploy">
           <el-switch
             v-model="temp.auto_deploy"
@@ -260,7 +274,8 @@ import {
   updateServiceEnvironment,
   deleteServiceEnvironment,
   getKubernetesEnvironmentConfigurationList,
-  getDockerEnvironmentConfigurationList
+  getDockerEnvironmentConfigurationList,
+  getEnvironmentVariables
 } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import { getEnvironmentList } from '@/api/environment'
@@ -286,6 +301,7 @@ export default {
       selectList5: [],
       selectList6: [],
       selectList7: [],
+      selectList8: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -302,6 +318,7 @@ export default {
         id: undefined,
         environment: '',
         service: '',
+        replica_count: 0,
         resource: '',
         service_config: '',
         kubernetes_enable: false,
@@ -309,6 +326,7 @@ export default {
         docker_enable: false,
         docker_environment_config: '',
         git_branch_or_tag: '',
+        environment_variable: [],
         service_prometheus: '',
         project: '',
         auto_deploy: false
@@ -321,37 +339,37 @@ export default {
       },
       rules: {
         environment: [
-          { required: true, message: '环境必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         service: [
-          { required: true, message: '关联服务必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        replica_count: [
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         resource: [
-          { required: true, message: '所需资源必须填写', trigger: 'blur' }
-        ],
-        service_config: [
-          { required: true, message: '服务关联配置必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         kubernetes_enable: [
-          { required: true, message: '是否是Kubernetes部署必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         kubernetes_environment_config: [
-          { required: true, message: '服务的kubernetes配置必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         docker_enable: [
-          { required: true, message: '是否是docker部署必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         docker_environment_config: [
-          { required: true, message: '服务的Docker配置必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         git_branch_or_tag: [
-          { required: true, message: '分支必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         project: [
-          { required: true, message: '所属项目必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         auto_deploy: [
-          { required: true, message: '是否自动部署必须填写', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ]
       },
       downloadLoading: false
@@ -366,8 +384,14 @@ export default {
     this.getServiceResource()
     this.getServiceConfig()
     this.getService()
+    this.getEnvironmentVariable()
   },
   methods: {
+    getEnvironmentVariable() {
+      getEnvironmentVariables().then(response => {
+        this.selectList8 = response.data
+      })
+    },
     getProject() {
       getProjectList().then(response => {
         this.selectList1 = response.data

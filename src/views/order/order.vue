@@ -18,17 +18,6 @@
       >
         搜索
       </el-button>
-      <router-link to="/config/service_create">
-        <el-button
-          v-loading="listLoading"
-          class="filter-item"
-          style="margin-left: 10px"
-          type="primary"
-          icon="el-icon-edit"
-        >
-          新增
-        </el-button>
-      </router-link>
     </div>
 
     <el-table
@@ -97,8 +86,7 @@
       >
         <template slot-scope="{ row, $index }">
           <router-link :to="'detail/'+row.id">
-            <el-button type="primary" size="mini" icon="el-icon-edit" style="margin-bottom: 10px;">
-            </el-button>
+            <el-button type="primary" size="mini" icon="el-icon-edit" style="margin-bottom: 10px;" />
           </router-link>
           <el-button
             size="mini"
@@ -106,8 +94,7 @@
             icon="el-icon-delete"
             :disabled="row.status > 0 "
             @click="handleDelete(row, $index)"
-          >
-          </el-button>
+          />
         </template>
       </el-table-column>
     </el-table>

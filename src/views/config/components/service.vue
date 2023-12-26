@@ -152,71 +152,6 @@
                 <el-divider content-position="center">端口配置</el-divider>
               </el-row>
               <el-row>
-                <el-form-item style="width: 80%" label="是否开启环境变量" prop="service_environment_enable">
-                  <el-switch
-                    v-model="postForm.service_environment_enable"
-                    style="display: block"
-                    active-color="#13ce66"
-                    inactive-color="#ff4949"
-                    active-text="是"
-                    inactive-text="否"
-                    @change="changeEnvEnable()"
-                  />
-                </el-form-item>
-              </el-row>
-              <el-row v-if="postForm.service_environment_enable">
-                <div v-for="(env, index) in postForm.service_environment" :key="index">
-                  <el-row>
-                    <el-col :span="5" style="margin-right: 10px">
-                      <el-form-item
-                        :key="index"
-                        :label="'环境变量键：' + index"
-                        :prop="'service_environment.' + index + '.key'"
-                        :rules="env_rule"
-                      >
-                        <el-input v-model="env.key" />
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="5" style="margin-right: 10px">
-                      <el-form-item
-                        :key="index"
-                        :label="'环境变量值：' + index"
-                        :prop="'service_environment.' + index + '.value'"
-                        :rules="[{ required: true, message: '环境变量值不能为空', trigger: 'blur' }]"
-                      >
-                        <el-input v-model="env.value" />
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="5" style="margin-right: 10px">
-                      <el-form-item
-                        :key="index"
-                        :label="'类型：' + index"
-                        :prop="'service_environment.' + index + '.type'"
-                        :rules="{required: true, message: '端口类型不能为空', trigger: 'blur'}"
-                      >
-                        <el-select v-model="env.type">
-                          <el-option value="key" label="Key(键值对)">Key(键值对)</el-option>
-                          <el-option value="secret" label="Secret(密文)">Secret(密文)</el-option>
-                          <el-option value="config" label="Config(配置)">Config(配置)</el-option>
-                        </el-select>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="2">
-                      <el-form-item
-                        :key="index+'s'"
-                        :label="` \u00a0`"
-                      >
-                        <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removeEnv(env)">删除</el-button>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
-                </div>
-                <el-form-item>
-                  <el-button type="success" @click="addEnv()">新增环境变量</el-button>
-                </el-form-item>
-                <el-divider content-position="center">环境变量配置</el-divider>
-              </el-row>
-              <el-row>
                 <el-form-item style="width: 80%" label="是否开启健康检查" prop="service_healthy_enable">
                   <el-switch
                     v-model="postForm.service_healthy_enable"
@@ -683,8 +618,6 @@ const defaultForm = {
   service_config: [],
   service_git: '',
   service_compile: 'clean package -Dmaven.test.skip=true',
-  service_environment_enable: false,
-  service_environment: [],
   service_healthy_enable: false,
   service_healthy_type: 'tcp',
   service_readiness: {},

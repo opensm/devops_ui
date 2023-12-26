@@ -136,7 +136,7 @@ import {
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
-  notice_type: 'ComplexTable',
+  name: 'ComplexTable',
   components: {
     Pagination
   },
