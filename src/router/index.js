@@ -354,6 +354,16 @@ export const asyncRoutes = [
           icon: 'el-icon-s-comment',
           roles: ['admin', 'manager', 'project-manager']
         }
+      },
+      {
+        path: 'jenkins',
+        name: 'jenkins',
+        component: () => import('@/views/config/jenkins'),
+        meta: {
+          title: 'Jenkins',
+          icon: 'el-icon-s-comment',
+          roles: ['admin', 'manager', 'project-manager']
+        }
       }
     ]
   },
@@ -419,14 +429,47 @@ export const asyncRoutes = [
           icon: 'el-icon-s-custom',
           roles: ['admin', 'project-user']
         }
-      }
+      },
+      {
+        path: 'jenkins_create',
+        name: 'jenkins_create',
+        component: () => import('@/views/order/jenkins_order_create'),
+        meta: {
+          title: '执行Jenkins任务',
+          icon: 'el-icon-user',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'jenkins_order',
+        name: 'jenkins_order',
+        component: () => import('@/views/order/jenkins_order'),
+        meta: {
+          title: 'Jenkins任务列表',
+          icon: 'el-icon-user',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'jenkins_order_detail/:id(\\d+)',
+        name: 'jenkins_order_detail',
+        component: () => import('@/views/order/jenkins_order_detail'),
+        meta: {
+          noCache: true,
+          activeMenu: '/order/jenkins_order',
+          title: 'Jenkins执行日志',
+          icon: 'el-icon-user',
+          roles: ['admin', 'project-user']
+        },
+        hidden: true
+      },
     ]
   },
   {
     path: '/jira',
     component: Layout,
     meta: {
-      title: 'Jira与制品',
+      title: 'Jira管理',
       icon: 'form',
       roles: ['admin', 'project-approve']
     },
@@ -434,23 +477,45 @@ export const asyncRoutes = [
       {
         path: 'index',
         name: 'jira',
-        component: () => import('@/views/form/index'),
+        component: () => import('@/views/jira/jira'),
         meta: {
-          title: 'jira配置',
+          title: 'Jira配置',
+          icon: 'form',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'project',
+        name: 'Jira项目版本',
+        component: () => import('@/views/jira/jira_project.vue'),
+        meta: {
+          title: 'Jira项目',
           icon: 'form',
           roles: ['admin', 'project-user']
         }
       },
       {
         path: 'version',
-        name: '版本',
-        component: () => import('@/views/form/index'),
+        name: 'Jira项目版本',
+        component: () => import('@/views/jira/jira_project_version.vue'),
         meta: {
           title: 'jira版本管理',
           icon: 'form',
           roles: ['admin', 'project-user']
         }
-      }
+      },
+      {
+        path: 'issue/:id(\\d+)',
+        component: () => import('@/views/jira/jira_project_version-issue.vue'),
+        name: '工单详情',
+        meta: {
+          title: '工单详情',
+          noCache: true,
+          activeMenu: '/order/detail',
+          roles: ['admin', 'manager', 'project-manager']
+        },
+        hidden: true
+      },
     ]
   },
   {

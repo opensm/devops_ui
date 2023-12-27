@@ -44,3 +44,24 @@ export function updateOrder(id, data) {
     data
   })
 }
+
+export function getJenkinsOrders() {
+  return request({
+    url: `/order/jenkins_orders`,
+    method: 'get'
+  })
+}
+export function getJenkinsOrder(id) {
+  return request({
+    url: `/order/jenkins_order/${id}`,
+    method: 'get'
+  })
+}
+
+export function createJenkinsOrder(data) {
+  return request({
+    url: '/order/jenkins_orders',
+    method: 'post',
+    data
+  })
+}

@@ -305,3 +305,34 @@ export function updateEnvironmentVariable(id, data) {
     data
   })
 }
+
+
+export function getJenkinsAll(query) {
+  return request({
+    url: '/config/jenkins_all',
+    method: 'get',
+    params: query
+  })
+}
+
+export function createJenkins(data) {
+  return request({
+    url: '/config/jenkins_all',
+    method: 'post',
+    data
+  })
+}
+export function deleteJenkins(id) {
+  return request({
+    url: `/config/jenkins/${id}`,
+    method: 'delete'
+  })
+}
+
+export function updateJenkins(id, data) {
+  return request({
+    url: `/config/jenkins/${id}`,
+    method: 'put',
+    data
+  })
+}
