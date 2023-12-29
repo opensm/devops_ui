@@ -446,7 +446,7 @@ export const asyncRoutes = [
         component: () => import('@/views/order/jenkins_order'),
         meta: {
           title: 'Jenkins任务列表',
-          icon: 'el-icon-user',
+          icon: 'el-icon-chat-dot-square',
           roles: ['admin', 'project-user']
         }
       },
@@ -458,7 +458,7 @@ export const asyncRoutes = [
           noCache: true,
           activeMenu: '/order/jenkins_order',
           title: 'Jenkins执行日志',
-          icon: 'el-icon-user',
+          icon: 'el-icon-postcard',
           roles: ['admin', 'project-user']
         },
         hidden: true
@@ -470,7 +470,7 @@ export const asyncRoutes = [
     component: Layout,
     meta: {
       title: 'Jira管理',
-      icon: 'form',
+      icon: 'el-icon-alarm-clock',
       roles: ['admin', 'project-approve']
     },
     children: [
@@ -480,7 +480,7 @@ export const asyncRoutes = [
         component: () => import('@/views/jira/jira'),
         meta: {
           title: 'Jira配置',
-          icon: 'form',
+          icon: 'el-icon-timer',
           roles: ['admin', 'project-user']
         }
       },
@@ -490,7 +490,7 @@ export const asyncRoutes = [
         component: () => import('@/views/jira/jira_project.vue'),
         meta: {
           title: 'Jira项目',
-          icon: 'form',
+          icon: 'el-icon-watch-1',
           roles: ['admin', 'project-user']
         }
       },
@@ -500,7 +500,7 @@ export const asyncRoutes = [
         component: () => import('@/views/jira/jira_project_version.vue'),
         meta: {
           title: 'jira版本管理',
-          icon: 'form',
+          icon: 'el-icon-football',
           roles: ['admin', 'project-user']
         }
       },

@@ -101,7 +101,7 @@ export default {
         page: 1,
         limit: 20,
         desc: undefined,
-        sort: '+id'
+        sort: '-id'
       },
       temp: {
         id: undefined,

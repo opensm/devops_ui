@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-form ref="form" :model="dataForm" label-width="120px">
       <el-form-item style="text-align: center;">
-        <span style="font-size: 30px;">新建发布工单</span>
+        <span style="font-size: 30px;">Jenkins</span>
       </el-form-item>
       <el-row>
         <el-col :span="11">

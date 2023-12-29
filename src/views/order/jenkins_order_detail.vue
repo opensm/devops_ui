@@ -61,8 +61,8 @@
     >
       <el-card
         style="color: #e6ebf5;background-color: #001528"
-        v-html="dataForm.jenkins_log">
-      </el-card>
+        v-html="dataForm.jenkins_log"
+      />
     </div>
   </div>
 </template>

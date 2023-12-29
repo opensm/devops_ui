@@ -45,10 +45,11 @@ export function updateOrder(id, data) {
   })
 }
 
-export function getJenkinsOrders() {
+export function getJenkinsOrders(params) {
   return request({
     url: `/order/jenkins_orders`,
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 export function getJenkinsOrder(id) {

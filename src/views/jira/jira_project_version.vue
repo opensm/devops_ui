@@ -61,6 +61,11 @@
           <span>{{ row.project_version_id }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="版本号" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.name }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="是否归档" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.archived }}</span>
@@ -99,7 +104,7 @@
       >
         <template slot-scope="{ row, $index }">
           <router-link :to="'issue/'+row.id">
-            <el-button type="primary" size="mini">
+            <el-button type="primary" size="mini" style="margin-right: 10px">
               问题清单
             </el-button>
           </router-link>
@@ -239,6 +244,9 @@ export default {
       },
       rules: {
         jira_project: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        name: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
         archived: [
