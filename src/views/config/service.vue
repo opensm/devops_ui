@@ -65,7 +65,8 @@
       </el-table-column>
       <el-table-column label="默认编译命令" width="400%" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.service_compile }}</span>
+          <span v-if="row.service_type === 'single'">{{ row.service_build_bin }} {{ row.service_build_params }}</span>
+          <span v-else>cd {{ row.service_build_path }} && {{ row.service_build_bin }} {{ row.service_build_params }}</span>
         </template>
       </el-table-column>
       <el-table-column label="端口启用" width="100px" align="center">

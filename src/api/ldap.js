@@ -29,3 +29,33 @@ export function updateldap(id, data) {
     data
   })
 }
+
+export function getldapGroupList(query) {
+  return request({
+    url: '/auth/ldap_groups',
+    method: 'get',
+    params: query
+  })
+}
+
+export function createLdapGroup(data) {
+  return request({
+    url: '/auth/ldap_groups',
+    method: 'post',
+    data
+  })
+}
+export function deleteLdapGroup(id) {
+  return request({
+    url: `/auth/ldap_group/${id}`,
+    method: 'delete'
+  })
+}
+
+export function updateLdapGroup(id, data) {
+  return request({
+    url: `/auth/ldap_group/${id}`,
+    method: 'put',
+    data
+  })
+}

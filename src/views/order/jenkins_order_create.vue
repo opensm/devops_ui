@@ -37,7 +37,7 @@
               <el-option
                 v-for="(select, index) in selectOption2"
                 :key="index"
-                :label="select.address"
+                :label=" '任务：' + select.name + '，地址：' + select.address"
                 :value="select.id"
               />
             </el-select>

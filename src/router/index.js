@@ -538,12 +538,12 @@ export const asyncRoutes = [
         }
       },
       {
-        path: 'tree',
-        name: 'tree',
-        component: () => import('@/views/form/index'),
+        path: 'group',
+        name: 'group',
+        component: () => import('@/views/auth/ldap_group.vue'),
         meta: {
           title: '组织管理',
-          icon: 'form',
+          icon: 'el-icon-baseball',
           roles: ['admin', 'project-user']
         }
       },

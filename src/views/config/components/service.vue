@@ -20,6 +20,40 @@
             <div class="postInfo-container">
               <el-row>
                 <el-col :span="10" style="margin-bottom: 40px;">
+                  <el-form-item style="width: 80%" label="服务类型" prop="service_type">
+<!--                    <el-checkbox-group-->
+<!--                      v-model="postForm.service_type"-->
+<!--                      placeholder="服务类型"-->
+<!--                    >-->
+<!--                      <el-checkbox-button label="multiple" key="multiple">multiple</el-checkbox-button>-->
+<!--                      <el-checkbox-button label="single" key="single">single</el-checkbox-button>-->
+<!--                    </el-checkbox-group>-->
+                    <el-switch
+                      style="display: block"
+                      v-model="postForm.service_type"
+                      active-color="#13ce66"
+                      inactive-color="#ff4949"
+                      active-text="复合项目"
+                      inactive-text="单一项目"
+                      active-value="multiple"
+                      inactive-value="single"
+                    >
+                    </el-switch>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="10" style="margin-bottom: 40px;">
+                  <el-form-item v-if="postForm.service_type ==='multiple'" style="width: 80%" label="编译路径" prop="service_build_path">
+                    <el-input
+                      v-model="postForm.service_build_path"
+                      class="filter-item"
+                      size="medium"
+                      placeholder="编译路径"
+                    />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="10" style="margin-bottom: 40px;">
                   <el-form-item style="width: 80%" label="代码仓库" prop="service_git">
                     <el-input
                       v-model="postForm.service_git"
@@ -48,9 +82,9 @@
               </el-row>
               <el-row>
                 <div style="margin-top: 15px;">
-                  <el-form-item label="编译命令" prop="service_compile">
+                  <el-form-item label="编译命令" prop="service_build_bin">
 
-                    <el-select v-model="compile_exe" placeholder="请选择" style="width: 20%">
+                    <el-select v-model="postForm.service_build_bin" placeholder="请选择" style="width: 20%">
                       <el-option label="npm版本：6.14.4，node版本：v16.15.1" value="npm-6.14.4-node-v16.15.1">
                         npm版本：6.14.4，node版本：v16.15.1
                       </el-option>
@@ -68,7 +102,7 @@
                       </el-option>
                     </el-select>
                     <el-input
-                      v-model="postForm.service_compile"
+                      v-model="postForm.service_build_params"
                       style="width: 60%"
                       class="input-with-select"
                       placeholder="代码仓库"
@@ -616,8 +650,11 @@ const defaultForm = {
   service_ports_enable: false,
   service_ports: [],
   service_config: [],
+  service_build_path: '',
+  service_type: 'single',
   service_git: '',
-  service_compile: 'clean package -Dmaven.test.skip=true',
+  service_build_bin: '',
+  service_build_params: 'clean package -Dmaven.test.skip=true',
   service_healthy_enable: false,
   service_healthy_type: 'tcp',
   service_readiness: {},
@@ -668,7 +705,7 @@ export default {
       configList: [],
       service_healthy_type: 'tcp',
       service_healthy_type2: 'tcp',
-      compile_exe: 'mvn-3.6.3-java-1.8.0_202',
+      service_build_bin: 'mvn-3.6.3-java-1.8.0_202',
       postForm: Object.assign({}, defaultForm),
       loading: false,
       port_rules: [
@@ -687,14 +724,23 @@ export default {
           { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
           { validator: validateSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
         ],
+        service_build_bin: [
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
+        ],
+        service_type: [
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
+        ],
         service_ports_enable: [
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
+        ],
+        service_build_path: [
           { required: true, message: '该字段是必填项', trigger: 'blur' }
         ],
         service_git: [
           { required: true, message: '该字段是必填项', trigger: 'blur' },
           { validator: validateGit, trigger: 'blur' }
         ],
-        service_compile: [
+        service_build_params: [
           { required: true, message: '该字段是必填项', trigger: 'blur' }
         ],
         service_healthy_enable: [

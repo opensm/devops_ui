@@ -1,102 +1,34 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <el-input
-        v-model="listQuery.name"
-        placeholder="Title"
-        style="width: 200px"
-        class="filter-item"
-        @keyup.enter.native="handleFilter"
-      />
-      <el-button
-        v-waves
-        style="margin-left: 10px"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-search"
-        @click="handleFilter"
-      >
-        搜索
-      </el-button>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px"
-        type="primary"
-        icon="el-icon-edit"
-        @click="handleCreate"
-      >
-        新增
-      </el-button>
-    </div>
-
-    <el-table
-      :key="tableKey"
-      v-loading="listLoading"
-      :data="list"
-      border
-      fit
-      highlight-current-row
-      style="width: 100%"
-      @sort-change="sortChange"
-    >
-      <el-table-column
-        label="ID"
-        prop="id"
-        sortable="custom"
-        align="center"
-        width="80"
-        :class-name="getSortClass('id')"
-      >
-        <template slot-scope="{ row }">
-          <span>{{ row.id }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="服务器" width="200%" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.ldap_server }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="管理账号" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.ldap_binddn }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="账号字段" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.ldap_login_attribute }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="域信息" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.ldap_base_dn }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.desc }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="操作"
-        align="center"
-        width="auto"
-        class-name="small-padding fixed-width"
-      >
-        <template slot-scope="{ row, $index }">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            Edit
+    <div class="custom-tree-container">
+      <div class="block">
+        <p>使用 scoped slot</p>
+        <el-tree
+          :data="data"
+          show-checkbox
+          node-key="id"
+          default-expand-all
+          :expand-on-click-node="false">
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>{{ node.label }}</span>
+        <span>
+          <el-button
+            type="text"
+            size="mini"
+            @click="() => handleCreate(data)">
+            添加
           </el-button>
           <el-button
+            type="text"
             size="mini"
-            type="danger"
-            @click="handleDelete(row, $index)"
-          >
+            @click="() => handleDelete(node, data)">
             Delete
           </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
+        </span>
+      </span>
+        </el-tree>
+      </div>
+    </div>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
@@ -106,57 +38,57 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="地址" prop="ldap_server">
+        <el-form-item label="组名称" prop="group_name">
           <el-input
-            v-model="temp.ldap_server"
+            v-model="temp.group_name"
             class="filter-item"
-            placeholder="请填写服务端地址"
+            placeholder="请输入组名称"
           />
         </el-form-item>
-        <el-form-item label="管理账号" prop="ldap_binddn">
+        <el-form-item label="组代码" prop="group_code">
           <el-input
-            v-model="temp.ldap_binddn"
+            v-model="temp.group_code"
             class="filter-item"
-            placeholder="填入管理账号"
+            placeholder="请输入组代码"
           />
         </el-form-item>
-        <el-form-item label="管理密码" prop="ldap_bindpass">
+        <el-form-item label="组类别" prop="group_type">
           <el-input
-            v-model="temp.ldap_bindpass"
+            v-model="temp.group_type"
             class="filter-item"
-            placeholder="填入管理密码"
+            placeholder="请选择组类别"
           />
         </el-form-item>
-        <el-form-item label="账号字段" prop="ldap_login_attribute">
+        <el-form-item label="父级组" prop="parent_group">
           <el-input
-            v-model="temp.ldap_login_attribute"
+            v-model="temp.parent_group"
             class="filter-item"
-            placeholder="登录匹配的账号字段"
+            placeholder="请选择父级组"
           />
         </el-form-item>
-        <el-form-item label="域信息" prop="ldap_base_dn">
+        <el-form-item label="服务器信息" prop="auth">
           <el-input
-            v-model="temp.ldap_base_dn"
+            v-model="temp.auth"
             class="filter-item"
-            placeholder="域信息,例如：aaa.com或者ou=aaa,cn=com"
+            placeholder="请选择关联服务器信息"
           />
         </el-form-item>
-        <el-form-item label="备注" prop="desc">
+        <el-form-item label="desc">
           <el-input
             v-model="temp.desc"
             :autosize="{ minRows: 2, maxRows: 4 }"
             type="textarea"
-            placeholder="备注"
+            placeholder="Please input desc"
           />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false"> 取消</el-button>
+        <el-button @click="dialogFormVisible = false"> Cancel </el-button>
         <el-button
           type="primary"
           @click="dialogStatus === 'create' ? createData() : updateData()"
         >
-          确认
+          Confirm
         </el-button>
       </div>
     </el-dialog>
@@ -164,10 +96,10 @@
 </template>
 <script>
 import {
-  getldapList,
-  createldap,
-  updateldap,
-  deleteldap
+  getldapGroupList,
+  createLdapGroup,
+  updateLdapGroup,
+  deleteLdapGroup
 } from '@/api/ldap'
 import waves from '@/directive/waves' // waves directive
 export default {
@@ -176,29 +108,59 @@ export default {
   data() {
     return {
       tableKey: 0,
-      list: null,
+      list: [{}],
       total: 0,
       listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
+        importance: undefined,
         title: undefined,
         type: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
-      showReviewer: false,
+      data: [{
+        id: 1,
+        label: '一级 1',
+        children: [{
+          id: 4,
+          label: '二级 1-1',
+          children: [{
+            id: 9,
+            label: '三级 1-1-1'
+          }, {
+            id: 10,
+            label: '三级 1-1-2'
+          }]
+        }]
+      }, {
+        id: 2,
+        label: '一级 2',
+        children: [{
+          id: 5,
+          label: '二级 2-1'
+        }, {
+          id: 6,
+          label: '二级 2-2'
+        }]
+      }, {
+        id: 3,
+        label: '一级 3',
+        children: [{
+          id: 7,
+          label: '二级 3-1'
+        }, {
+          id: 8,
+          label: '二级 3-2'
+        }]
+      }],
       temp: {
         id: undefined,
-        ldap_server: '',
-        ldap_binddn: '',
-        ldap_bindpass: '',
-        ldap_login_attribute: '',
-        ldap_base_dn: '',
-        desc: ''
+        group_name: '',
+        group_code: '',
+        group_type: '',
+        parent_group: '',
+        auth: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -206,23 +168,22 @@ export default {
         update: '修改',
         create: '新增'
       },
+      dialogPvVisible: false,
+      pvData: [],
       rules: {
-        ldap_server: [
+        group_name: [
+          { required: true, message: '字段必填', trigger: 'change' }
+        ],
+        group_code: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
-        ldap_binddn: [
+        group_type: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
-        ldap_bindpass: [
+        parent_group: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
-        ldap_login_attribute: [
-          { required: true, message: '字段必填', trigger: 'blur' }
-        ],
-        ldap_base_dn: [
-          { required: true, message: '字段必填', trigger: 'blur' }
-        ],
-        desc: [
+        auth: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ]
       }
@@ -234,7 +195,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getldapList(this.listQuery).then((response) => {
+      getldapGroupList(this.listQuery).then((response) => {
         this.list = response.data
         this.total = response.total
         // Just to simulate the time of the request
@@ -248,7 +209,7 @@ export default {
       this.getList()
     },
     sortChange(data) {
-      const {prop, order} = data
+      const { prop, order } = data
       if (prop === 'id') {
         this.sortByID(order)
       }
@@ -264,12 +225,11 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        ldap_server: '',
-        ldap_binddn: '',
-        ldap_bindpass: '',
-        ldap_login_attribute: '',
-        ldap_base_dn: '',
-        desc: ''
+        group_name: '',
+        group_code: '',
+        group_type: '',
+        parent_group: '',
+        auth: ''
       }
     },
     handleCreate() {
@@ -283,9 +243,9 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createldap(this.temp).then(response => {
+          createLdapGroup(this.temp).then(response => {
             this.dialogFormVisible = false
-            const {message, code} = response
+            const { message, code } = response
             this.$notify({
               title: '成功',
               message: `创建成功: ${message},代码：${code}`,
@@ -310,9 +270,9 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateldap(tempData.id, tempData).then(response => {
+          updateLdapGroup(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
-            const {message, code} = response
+            const { message, code } = response
             this.$notify({
               title: '成功',
               message: `修改成功： ${message},代码：${code}`,
@@ -325,8 +285,8 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteldap(row.id).then(response => {
-        const {message, code} = response
+      deleteLdapGroup(row.id).then(response => {
+        const { message, code } = response
         this.dialogFormVisible = false
         this.$notify({
           title: '成功',
@@ -338,10 +298,20 @@ export default {
       })
       this.list.splice(index, 1)
     },
-    getSortClass: function (key) {
+    getSortClass: function(key) {
       const sort = this.listQuery.sort
       return sort === `+${key}` ? 'ascending' : 'descending'
     }
   }
 }
 </script>
+<style>
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-right: 8px;
+}
+</style>
