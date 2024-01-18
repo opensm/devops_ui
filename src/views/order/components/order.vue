@@ -118,16 +118,17 @@
                   :prop="'suborders.' + index + '.service_env'"
                   :rules="{ required: true, message: '字段必填', trigger: 'blur' }"
                 >
+<!--                  :disabled="!dataForm.suborders[index]['object_id']"-->
                   <el-select
-                    v-model="suborder.service_env"
-                    :disabled="!suborder[index]['object_id']"
+                    v-model="dataForm.suborders[index]['service_env']"
+
                     @change="get_images"
                   >
                     <el-option
-                      v-for="(content, index1) in service_select"
+                      v-for="(contents, index1) in service_select"
                       :key="'service_select'+index1"
-                      :label="'项目：' + content.rw_project + '，环境:' + content.rw_environment + '，服务:' + content.rw_service"
-                      :value="content.id"
+                      :label="'项目：' + contents.rw_project + '，环境:' + contents.rw_environment + '，服务:' + contents.rw_service"
+                      :value="contents.id"
                     />
                   </el-select>
                 </el-form-item>
