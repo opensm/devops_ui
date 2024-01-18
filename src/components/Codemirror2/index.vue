@@ -162,12 +162,12 @@ export default {
     },
     editorValues: function(val) {
       this.editorValue = val
-      const post1 = this.$refs.myCm.codemirror.getCursor()
-      const pos2 = {
-        line: post1.line, // 行号
-        ch: post1.ch // 光标位置
-      }
-      this.$refs.myCm.codemirror.replaceRange(val, pos2) // 替换内容
+      // let post1 = this.$refs.myCm.codemirror.getCursor()
+      // const pos2 = {
+      //   line: post1.line, // 行号
+      //   ch: post1.ch // 光标位置
+      // }
+      // this.$refs.myCm.codemirror.replaceRange(val, pos2) // 替换内容
     }
   },
   created() {

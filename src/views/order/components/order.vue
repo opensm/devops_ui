@@ -24,7 +24,7 @@
             >
               <el-option
                 v-for="(notice, index) in notice_select"
-                :key="index"
+                :key="'notice'+index"
                 :label="notice.notice_type"
                 :value="notice.id"
               />
@@ -50,7 +50,7 @@
       <el-row class="suborder">
         <div
           v-for="(suborder,index) in dataForm.suborders"
-          :key="index"
+          :key="'suborders'+index"
         >
           <el-divider />
           <el-row type="flex" align="middle">
@@ -63,37 +63,53 @@
                 <el-select v-model="suborder.content_type" @change="content_change($event,index)">
                   <el-option
                     v-for="(content, index1) in content_type"
-                    :key="index1"
+                    :key="'contentType'+index1"
                     :label="content.model.label"
                     :value="content.id"
                   />
                 </el-select>
               </el-form-item>
               <el-form-item
-                :key="index"
                 label="关联配置："
                 :prop="'suborders.' + index + '.object_id'"
-                :rules="[{required: true, message: '对应配置不能为空', trigger: 'blur'}]"
+                :rules="[{required: true, message: '对应配置不能为空', trigger: 'change'}]"
               >
                 <el-select
-                  v-model="suborder.object_id"
-                  :disabled="!suborder.content_type"
+                  v-model="dataForm.suborders[index]['object_id']"
+                  :disabled="!dataForm.suborders[index].content_type"
                 >
                   <template v-for="(content, index1) in suborder_select[index]">
                     <el-option
                       v-if="'address' in content"
-                      :key="index1"
+                      :key="index1+'addresss'"
                       :value="content.id"
                       :label="content.rw_environment + ':' + content.address"
                     />
                     <el-option
                       v-else
-                      :key="index1"
+                      :key="index1+'addresss1'"
                       :value="content.id"
                       :label="content.helm_repo_chart"
                     />
                   </template>
                 </el-select>
+              </el-form-item>
+              <el-form-item
+                v-if="suborder.content_type==19"
+                :key="index"
+                label="数据库名称："
+                :prop="'suborders.' + index + '.correlation_name'"
+                :rules="[{required: true, message: '数据库名称不能为空', trigger: 'blur'}]"
+              >
+                <el-input v-model="dataForm.suborders[index]['correlation_name']" type="textarea" />
+              </el-form-item>
+              <el-form-item
+                v-if="suborder.content_type==19"
+                label="新增是否备份："
+                :prop="'suborders.' + index + '.is_backup'"
+                :rules="{required: true, message: '字段必填', trigger: 'change'}"
+              >
+                <el-switch v-model="dataForm.suborders[index].is_backup" />
               </el-form-item>
               <el-row>
                 <el-form-item
@@ -104,16 +120,40 @@
                 >
                   <el-select
                     v-model="suborder.service_env"
-                    :disabled="! suborder.object_id"
+                    :disabled="!suborder[index]['object_id']"
                     @change="get_images"
                   >
                     <el-option
                       v-for="(content, index1) in service_select"
-                      :key="index1"
+                      :key="'service_select'+index1"
                       :label="'项目：' + content.rw_project + '，环境:' + content.rw_environment + '，服务:' + content.rw_service"
                       :value="content.id"
                     />
                   </el-select>
+                </el-form-item>
+                <el-form-item
+                  v-if="suborder.content_type==22"
+                  label="命名空间："
+                  :prop="'suborders.' + index + '.namespace'"
+                  :rules="[{required: true, message: '命名空间不能为空', trigger: 'blur'}]"
+                >
+                  <el-input v-model="dataForm.suborders[index]['namespace']" />
+                </el-form-item>
+                <el-form-item
+                  v-if="suborder.content_type==22"
+                  label="分组："
+                  :prop="'suborders.' + index + '.group'"
+                  :rules="[{required: true, message: '分组不能为空', trigger: 'blur'}]"
+                >
+                  <el-input v-model="dataForm.suborders[index]['group']" />
+                </el-form-item>
+                <el-form-item
+                  v-if="suborder.content_type==22"
+                  label="文件名称："
+                  :prop="'suborders.' + index + '.file_name'"
+                  :rules="[{required: true, message: '文件名称不能为空', trigger: 'blur'}]"
+                >
+                  <el-input v-model="dataForm.suborders[index]['file_name']" />
                 </el-form-item>
                 <el-form-item
                   label="强制执行："
@@ -142,7 +182,7 @@
                 <el-select v-model="suborder.images">
                   <el-option
                     v-for="(product,index1) in image_select"
-                    :key="index1"
+                    :key="'image_select'+index1"
                     :value="product.id"
                     :label="product.images"
                   />
@@ -200,13 +240,22 @@ export default {
       service_select: [],
       image_select: [],
       notice_select: [],
-      dataForm: Object.assign({}, defaultForm)
+      dataForm: Object.assign({}, defaultForm),
     }
   },
   created() {
+    debugger
     if (this.isEdit) {
+      debugger
       const id = this.$route.params && this.$route.params.id
       this.fetchData(id)
+    }else{
+      this.dataForm= {
+        order_time: undefined,
+        notice: [],
+        suborders: [],
+        desc: ''
+      }
     }
     this.getSelectContentType()
     this.getServiceEnvironment()
@@ -273,7 +322,12 @@ export default {
         go_over: false,
         params: '',
         service_env: '',
-        images: ''
+        images: '',
+        namespace:'',
+        group:'',
+        file_name:'',
+        is_backup:false,
+        correlation_name:''
       })
       this.suborder_select.push({})
     },
@@ -284,9 +338,19 @@ export default {
         this.suborder_select.splice(index, 1)
       }
     },
+    dealData(data){
+     data.suborders.forEach(val=>{
+      if(val.content_type===22){
+        val['correlation_name']=val.namespace+val.group+val.file_name
+      }
+     })
+      return data
+    },
     onSubmit() {
       this.$refs.form.validate(valid => {
         if (valid) {
+
+          console.log(this.dealData(this.dataForm))
           this.loading = true
           if (this.isEdit) {
             updateOrder(this.from.id, this.from).then(response => {
