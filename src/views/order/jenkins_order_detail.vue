@@ -2,6 +2,13 @@
   <div class="app-container background-order">
     <el-descriptions class="margin-top" title="Jenkins任务信息" :column="3" border>
       <template slot="extra">
+        <com_auto_refresh @done="hand_refreshH" />
+        <el-button :type="is_refreshing_ani?'success':'primary'" size="mini" style="margin-right: 25px" @click="hand_refreshH">
+          <i :class="['el-icon-refresh', { rotate: is_refreshing_ani }]" />
+          {{ is_refreshing_ani ? '正在':'强制' }}刷新
+        </el-button>
+      </template>
+      <template slot="extra">
         <router-link to="/order/jenkins_order">
           <el-button type="primary" style="margin-right: 10px" size="small">返回</el-button>
         </router-link>
@@ -70,10 +77,15 @@
 <script>
 
 import { getJenkinsOrder } from '@/api/order'
+import com_auto_refresh from '@/components/ComAutoRefresh'
 
 export default {
+  components: {
+    com_auto_refresh
+  },
   data() {
     return {
+      is_refreshing_ani: false,
       id: '',
       dataForm: [],
       listLoading: false
@@ -84,6 +96,14 @@ export default {
     this.fetchData(this.id)
   },
   methods: {
+    hand_refreshH() {
+      // 刷新时的按钮动画
+      this.is_refreshing_ani = true
+      setTimeout(() => {
+        this.is_refreshing_ani = false
+      }, 600)
+      this.fetchData(this.id)
+    },
     fetchData(id) {
       getJenkinsOrder(id).then(response => {
         this.dataForm = response.data

@@ -101,7 +101,7 @@
       >
         <el-form-item label="通知类型" prop="notice_type">
           <el-select v-model="temp.notice_type">
-            <el-option value="dingding" label="钉钉机器人" />
+            <el-option value="dingtalk" label="钉钉机器人" />
             <el-option value="wechat" label="企业微信机器人" />
           </el-select>
         </el-form-item>

@@ -123,10 +123,11 @@
         :model="temp"
         label-position="left"
         label-width="140px"
-        style="width: 400px; margin-left: 50px"
+        style="width: 800px; margin-left: 50px"
       >
+        <el-tag type="success">标签三</el-tag>
         <el-form-item label="关联项目" prop="project">
-          <el-select v-model="temp.project">
+          <el-select v-model="temp.project" size="medium">
             <el-option
               v-for="config in selectList1"
               :key="config.id"
@@ -136,7 +137,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="所属环境" prop="environment">
-          <el-select v-model="temp.environment">
+          <el-select v-model="temp.environment" size="medium">
             <el-option
               v-for="env in selectList4"
               :key="env.id"
@@ -146,7 +147,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="关联服务" prop="service">
-          <el-select v-model="temp.service">
+          <el-select v-model="temp.service" size="medium">
             <el-option
               v-for="svc in selectList7"
               :key="svc.id"
@@ -156,10 +157,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="副本数" prop="replica_count">
-          <el-input-number v-model="temp.replica_count" />
+          <el-input-number v-model="temp.replica_count" size="medium" />
         </el-form-item>
         <el-form-item label="资源" prop="resource">
-          <el-select v-model="temp.resource">
+          <el-select v-model="temp.resource" size="medium" >
             <el-option
               v-for="resource in selectList5"
               :key="resource.id"
@@ -171,7 +172,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="环境变量" prop="environment_variable">
-          <el-select v-model="temp.environment_variable" multiple clearable>
+          <el-select v-model="temp.environment_variable" size="medium" multiple clearable>
             <el-option
               v-for="config in selectList8"
               :key="config.id"
@@ -180,8 +181,18 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="部署Yaml版本" prop="helm_chart_version">
+          <el-select v-model="temp.helm_chart_version" size="medium" clearable>
+            <el-option
+              v-for="config in selectList9"
+              :key="config.id"
+              :value="config.id"
+              :label="config.helm_repo_chart_version"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="配置文件" prop="service_config">
-          <el-select v-model="temp.service_config" multiple clearable>
+          <el-select v-model="temp.service_config" size="medium" multiple clearable>
             <el-option
               v-for="config in selectList6"
               :key="config.id"
@@ -198,6 +209,7 @@
             inactive-color="#ff4949"
             active-text="是"
             inactive-text="否"
+            size="medium"
           />
         </el-form-item>
         <el-form-item
@@ -205,7 +217,7 @@
           label="关联k8s配置"
           prop="kubernetes_environment_config"
         >
-          <el-select v-model="temp.kubernetes_environment_config">
+          <el-select v-model="temp.kubernetes_environment_config" size="medium" >
             <el-option
               v-for="config in selectList2"
               :key="config.id"
@@ -222,6 +234,7 @@
             inactive-color="#ff4949"
             active-text="是"
             inactive-text="否"
+            size="medium"
           />
         </el-form-item>
         <el-form-item
@@ -233,14 +246,16 @@
             v-for="config in selectList3"
             :key="config.id"
             v-model="temp.docker_environment_config"
+            size="medium"
           >
-            <el-option :value="config.id" :label="config.docker_instances"> {{ config.docker_instances }}</el-option>
+            <el-option :value="config.id" :label="config.docker_instances" />
           </el-select>
         </el-form-item>
         <el-form-item label="所用分支" prop="git_branch_or_tag">
           <el-input
             v-model="temp.git_branch_or_tag"
             class="filter-item"
+            size="medium"
             placeholder="所用分支"
           />
         </el-form-item>
@@ -252,6 +267,7 @@
             inactive-color="#ff4949"
             active-text="是"
             inactive-text="否"
+            size="medium"
           />
         </el-form-item>
       </el-form>
@@ -275,7 +291,7 @@ import {
   deleteServiceEnvironment,
   getKubernetesEnvironmentConfigurationList,
   getDockerEnvironmentConfigurationList,
-  getEnvironmentVariables
+  getEnvironmentVariables, getKubernetesHelmChartList
 } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import { getEnvironmentList } from '@/api/environment'
@@ -302,6 +318,7 @@ export default {
       selectList6: [],
       selectList7: [],
       selectList8: [],
+      selectList9: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -329,6 +346,7 @@ export default {
         environment_variable: [],
         service_prometheus: '',
         project: '',
+        helm_chart_version: '',
         auto_deploy: false
       },
       dialogFormVisible: false,
@@ -365,14 +383,16 @@ export default {
         git_branch_or_tag: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
+        helm_chart_version: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
         project: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
         auto_deploy: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
   },
   created() {
@@ -385,6 +405,7 @@ export default {
     this.getServiceConfig()
     this.getService()
     this.getEnvironmentVariable()
+    this.getHelmChart()
   },
   methods: {
     getEnvironmentVariable() {
@@ -425,6 +446,11 @@ export default {
     getService() {
       getServiceList().then(response => {
         this.selectList7 = response.data
+      })
+    },
+    getHelmChart() {
+      getKubernetesHelmChartList().then(response => {
+        this.selectList9 = response.data
       })
     },
     getList() {
@@ -470,6 +496,7 @@ export default {
         git_branch_or_tag: '',
         service_prometheus: '',
         project: '',
+        helm_chart_version: '',
         auto_deploy: false
       }
     },

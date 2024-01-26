@@ -51,6 +51,11 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="项目" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.rw_project }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="所属环境" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.rw_environment }}</span>
@@ -113,13 +118,23 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
+        <el-form-item label="项目" prop="project">
+          <el-select v-model="temp.project">
+            <el-option
+              v-for="( item, index ) in projectSelectList"
+              :key="index"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="所属环境" prop="environment">
           <el-select v-model="temp.environment">
             <el-option
-              v-for="(item, index ) in selectList"
+              v-for="( item, index ) in envSelectList"
+              :key="index"
               :label="item.environment"
               :value="item.id"
-              :key="index"
             />
           </el-select>
         </el-form-item>
@@ -174,8 +189,9 @@ import waves from '@/directive/waves' // waves directive
 import { getEnvironmentList } from '@/api/environment'
 import Pagination from '@/components/Pagination'
 import { enSecret } from '@/utils/secret'
-import store from "@/store";
-import { mapGetters } from "vuex";
+import store from '@/store'
+import { mapGetters } from 'vuex'
+import { getProjectList } from '@/api/project'
 export default {
   name: 'ComplexTable',
   components: {
@@ -187,7 +203,8 @@ export default {
       tableKey: 0,
       list: null,
       total: 0,
-      selectList: [],
+      projectSelectList: [],
+      envSelectList: [],
       listLoading: true,
       listQuery: {
         page: 1,
@@ -200,7 +217,8 @@ export default {
         address: '',
         password: '',
         username: '',
-        environment: ''
+        environment: '',
+        project: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -209,6 +227,9 @@ export default {
         create: '新增'
       },
       rules: {
+        project: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
         protocol: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
@@ -227,19 +248,25 @@ export default {
       }
     }
   },
-  created() {
-    this.getList()
-    this.getEnvironmentList()
-  },
   computed: {
     ...mapGetters([
       'publickey'
     ])
   },
+  created() {
+    this.getList()
+    this.getEnvironmentList()
+    this.getProject()
+  },
   methods: {
+    getProject() {
+      getProjectList().then(response => {
+        this.projectSelectList = response.data
+      })
+    },
     getEnvironmentList() {
       getEnvironmentList().then(response => {
-        this.selectList = response.data
+        this.envSelectList = response.data
       })
     },
     getList() {
@@ -277,7 +304,8 @@ export default {
         address: '',
         password: '',
         username: '',
-        environment: ''
+        environment: '',
+        project: ''
       }
     },
     handleCreate() {
@@ -308,7 +336,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

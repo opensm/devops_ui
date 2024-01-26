@@ -62,14 +62,15 @@
               >
                 <el-select v-model="suborder.content_type" @change="content_change($event,index)">
                   <el-option
-                    v-for="(content, index1) in content_type"
+                    v-for="(content, index1) in content_object"
                     :key="'contentType'+index1"
-                    :label="content.model.label"
-                    :value="content.id"
+                    :label="content.label"
+                    :value="content.value"
                   />
                 </el-select>
               </el-form-item>
               <el-form-item
+                v-if="order_type[index] !== 'kuberneteshelmchartmodel'"
                 label="关联配置："
                 :prop="'suborders.' + index + '.object_id'"
                 :rules="[{required: true, message: '对应配置不能为空', trigger: 'change'}]"
@@ -95,7 +96,7 @@
                 </el-select>
               </el-form-item>
               <el-form-item
-                v-if="suborder.content_type==19"
+                v-if="suborder.content_type === 19"
                 :key="index"
                 label="数据库名称："
                 :prop="'suborders.' + index + '.correlation_name'"
@@ -104,7 +105,7 @@
                 <el-input v-model="dataForm.suborders[index]['correlation_name']" type="textarea" />
               </el-form-item>
               <el-form-item
-                v-if="suborder.content_type==19"
+                v-if="suborder.content_type === 19"
                 label="新增是否备份："
                 :prop="'suborders.' + index + '.is_backup'"
                 :rules="{required: true, message: '字段必填', trigger: 'change'}"
@@ -118,7 +119,7 @@
                   :prop="'suborders.' + index + '.service_env'"
                   :rules="{ required: true, message: '字段必填', trigger: 'blur' }"
                 >
-<!--                  :disabled="!dataForm.suborders[index]['object_id']"-->
+                  <!--                  :disabled="!dataForm.suborders[index]['object_id']"-->
                   <el-select
                     v-model="dataForm.suborders[index]['service_env']"
 
@@ -133,7 +134,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item
-                  v-if="suborder.content_type==22"
+                  v-if="suborder.content_type === 22"
                   label="命名空间："
                   :prop="'suborders.' + index + '.namespace'"
                   :rules="[{required: true, message: '命名空间不能为空', trigger: 'blur'}]"
@@ -141,7 +142,7 @@
                   <el-input v-model="dataForm.suborders[index]['namespace']" />
                 </el-form-item>
                 <el-form-item
-                  v-if="suborder.content_type==22"
+                  v-if="suborder.content_type === 22"
                   label="分组："
                   :prop="'suborders.' + index + '.group'"
                   :rules="[{required: true, message: '分组不能为空', trigger: 'blur'}]"
@@ -149,7 +150,7 @@
                   <el-input v-model="dataForm.suborders[index]['group']" />
                 </el-form-item>
                 <el-form-item
-                  v-if="suborder.content_type==22"
+                  v-if="suborder.content_type === 22"
                   label="文件名称："
                   :prop="'suborders.' + index + '.file_name'"
                   :rules="[{required: true, message: '文件名称不能为空', trigger: 'blur'}]"
@@ -195,7 +196,8 @@
                 :key="index+'s'"
                 :label="` \u00a0`"
               >
-                <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removeSuborder(suborder)">删除</el-button>
+                <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removeSuborder(suborder)">删除
+                </el-button>
               </el-form-item>
             </el-col>
           </el-row>
@@ -218,6 +220,7 @@
 
 import { getContentType, getOrder, createOrder, updateOrder } from '@/api/order'
 import { getServiceEnvironmentList, getNoticeList } from '@/api/config'
+import { getEnvironmentList } from '@/api/environment'
 
 const defaultForm = {
   order_time: undefined,
@@ -235,23 +238,23 @@ export default {
   },
   data() {
     return {
+      content_object: [],
+      env_select: [],
       order_type: [],
       content_type: [],
       suborder_select: [],
       service_select: [],
       image_select: [],
       notice_select: [],
-      dataForm: Object.assign({}, defaultForm),
+      dataForm: Object.assign({}, defaultForm)
     }
   },
   created() {
-    debugger
     if (this.isEdit) {
-      debugger
       const id = this.$route.params && this.$route.params.id
       this.fetchData(id)
-    }else{
-      this.dataForm= {
+    } else {
+      this.dataForm = {
         order_time: undefined,
         notice: [],
         suborders: [],
@@ -259,6 +262,7 @@ export default {
       }
     }
     this.getSelectContentType()
+    this.getEnvironment()
     this.getServiceEnvironment()
     this.getNotice()
   },
@@ -307,6 +311,16 @@ export default {
         // Just to simulate the time of the request
       })
     },
+    getEnvironment() {
+      getEnvironmentList(this.listQuery).then(response => {
+        const { content, data } = response.data
+        console.log(response.data)
+        console.log(data)
+        this.content_object = content
+        this.env_select = data
+        // Just to simulate the time of the request
+      })
+    },
     getSelectContentType() {
       getContentType().then((response) => {
         this.content_type = response.data
@@ -324,11 +338,11 @@ export default {
         params: '',
         service_env: '',
         images: '',
-        namespace:'',
-        group:'',
-        file_name:'',
-        is_backup:false,
-        correlation_name:''
+        namespace: '',
+        group: '',
+        file_name: '',
+        is_backup: false,
+        correlation_name: ''
       })
       this.suborder_select.push({})
     },
@@ -339,18 +353,18 @@ export default {
         this.suborder_select.splice(index, 1)
       }
     },
-    dealData(data){
-     data.suborders.forEach(val=>{
-      if(val.content_type===22){
-        val['correlation_name']=val.namespace+val.group+val.file_name
-      }
-     })
+    dealData(data) {
+      data.suborders.forEach(val => {
+        console.log(val)
+        if (val.content_type === 22) {
+          val['correlation_name'] = val.namespace + val.group + val.file_name
+        }
+      })
       return data
     },
     onSubmit() {
       this.$refs.form.validate(valid => {
         if (valid) {
-
           console.log(this.dealData(this.dataForm))
           this.loading = true
           if (this.isEdit) {
@@ -395,24 +409,26 @@ export default {
 </script>
 
 <style scoped>
-.line{
+.line {
   text-align: center;
 }
 </style>
 
 <style>
-.suborder{
+.suborder {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   /*background-color: #409EFF;*/
-  background: linear-gradient(to bottom right,#ffba00,#e6ebf5);
+  background: linear-gradient(to bottom right, #ffba00, #e6ebf5);
   color: #e6ebf5;
   overflow: hidden;
 }
+
 .el-select {
   width: 100%;
 }
-.dialog-footer{
+
+.dialog-footer {
   margin-top: 3%;
   margin-right: 20%;
   text-align: right;

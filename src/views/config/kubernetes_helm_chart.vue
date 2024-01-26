@@ -87,10 +87,11 @@
         ref="dataForm"
         :rules="rules"
         :model="temp"
-        label-position="left"
+        width="50%"
+        label-position="center"
         label-width="120px"
-        style="width: 400px; margin-left: 50px"
-      >
+        style="width: 800px; margin-left: 50px"
+        center>
         <el-form-item label="helm模板" prop="helm_repo_chart">
           <el-input
             v-model="temp.helm_repo_chart"

@@ -56,6 +56,11 @@
           <span>{{ row.images }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="Jira版本" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.jira_version }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="是否有效" width="auto" align="center">
         <template slot-scope="{ row }">
           <span v-if="row.status">是</span>
@@ -64,7 +69,7 @@
       </el-table-column>
       <el-table-column label="是否部署" width="auto" align="center">
         <template slot-scope="{ row }">
-          <span v-if="row.install_status">是</span>
+          <span v-if="row.publish">是</span>
           <span v-else>否</span>
         </template>
       </el-table-column>
@@ -133,7 +138,7 @@
         </el-form-item>
         <el-form-item label="是否部署" prop="install_status">
           <el-switch
-            v-model="temp.install_status"
+            v-model="temp.publish"
             class="filter-item"
             placeholder="是否部署"
           />
@@ -182,7 +187,7 @@ export default {
       temp: {
         id: undefined,
         images: '',
-        install_status: false,
+        publish: false,
         status: false,
         service: ''
       },

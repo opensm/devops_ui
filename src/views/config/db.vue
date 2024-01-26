@@ -61,6 +61,11 @@
           <span>{{ row.address }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="项目" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.rw_project }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="所属环境" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.rw_environment }}</span>
@@ -71,18 +76,13 @@
           <span>{{ row.username }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="uri连接地址" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.uri }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" width="auto" align="center">
+      <el-table-column label="  备注" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.desc }}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="Actions"
+        label="操作"
         align="center"
         width="400px"
         class-name="small-padding fixed-width"
@@ -118,19 +118,31 @@
         label-width="120px"
         style="width: 400px; margin-left: 50px"
       >
+        <el-form-item label="项目" prop="project">
+          <el-select v-model="temp.project">
+            <el-option
+              v-for="(item,index) in projectSelectList"
+              :key="index"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属环境" prop="environment">
+          <el-select v-model="temp.environment">
+            <el-option
+              v-for="(item,index) in envSelectList"
+              :key="index"
+              :label="item.environment"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="数据库类型" prop="db_type">
           <el-select v-model="temp.db_type">
             <el-option value="mysql" label="MySQL" />
             <el-option value="mongodb" label="MongoDB" />
             <el-option value="clickhouse" label="ClickHouse" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Is uri" prop="is_uri">
-          <el-switch v-model="temp.is_uri" />
-        </el-form-item>
-        <el-form-item label="所属环境" prop="environment">
-          <el-select v-model="temp.environment">
-            <el-option v-for="(item,index) in selectList" :key="index" :label="item.environment" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="地址" prop="address">
@@ -154,16 +166,10 @@
             placeholder="密码"
           />
         </el-form-item>
-        <el-form-item v-if="temp.is_uri" label="uri连接地址" prop="uri">
-          <el-input
-            v-model="temp.uri"
-            class="filter-item"
-            placeholder="uri连接地址"
-          />
-        </el-form-item>
         <el-form-item label="备注" prop="desc">
           <el-input
             v-model="temp.desc"
+            type="textarea"
             class="filter-item"
             placeholder="备注"
           />
@@ -188,12 +194,13 @@ import {
   updateDB,
   deleteDB
 } from '@/api/config'
+import { getProjectList } from '@/api/project'
 import { getEnvironmentList } from '@/api/environment'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
-import {enSecret} from "@/utils/secret";
-import store from "@/store";
-import {mapGetters} from "vuex";
+import { enSecret } from '@/utils/secret'
+import store from '@/store'
+import { mapGetters } from 'vuex'
 export default {
   name: 'ComplexTable',
   components: {
@@ -206,7 +213,8 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
-      selectList: [],
+      projectSelectList: [],
+      envSelectList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -214,13 +222,12 @@ export default {
       },
       temp: {
         id: undefined,
+        project: '',
         db_type: '',
-        is_uri: false,
         environment: '',
         address: '',
         password: '',
         username: '',
-        uri: '',
         desc: ''
       },
       dialogFormVisible: false,
@@ -230,13 +237,13 @@ export default {
         create: '新增'
       },
       rules: {
-        db_type: [
-          { required: true, message: '字段必填', trigger: 'blur' }
-        ],
-        is_uri: [
+        project: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
         environment: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        db_type: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
         address: [
@@ -247,29 +254,33 @@ export default {
         ],
         password: [
           { required: true, message: '字段必填', trigger: 'blur' }
-        ],
-        uri: [
-          { required: true, message: '字段必填', trigger: 'blur' }
-        ],
-        desc: [
-          { required: true, message: '字段必填', trigger: 'blur' }
         ]
       }
     }
-  },
-  created() {
-    this.getList()
-    this.getEnvironmentList()
   },
   computed: {
     ...mapGetters([
       'publickey'
     ])
   },
+  created() {
+    this.getList()
+    this.getEnvironmentList()
+    this.getProject()
+  },
   methods: {
     getEnvironmentList() {
       getEnvironmentList().then(response => {
-        this.selectList = response.data
+        this.envSelectList = response.data
+      })
+    },
+    getProject() {
+      getProjectList().then((response) => {
+        this.projectSelectList = response.data
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
       })
     },
     getList() {
@@ -305,12 +316,11 @@ export default {
       this.temp = {
         id: undefined,
         db_type: '',
-        is_uri: false,
+        project: '',
         environment: '',
         address: '',
         password: '',
         username: '',
-        uri: '',
         desc: ''
       }
     },

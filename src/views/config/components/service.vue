@@ -16,29 +16,37 @@
                 服务名称
               </MDinput>
             </el-form-item>
-
             <div class="postInfo-container">
+              <el-row>
+                <el-col :span="24" style="margin-bottom: 40px;">
+                  <el-form-item style="width: 50%" label="所属项目" prop="project">
+                    <el-select
+                      v-model="postForm.project"
+                      clearable
+                    >
+                      <el-option
+                        v-for="(config,index) in projectList"
+                        :key="index"
+                        :value="config.id"
+                        :label="config.name"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
               <el-row>
                 <el-col :span="10" style="margin-bottom: 40px;">
                   <el-form-item style="width: 80%" label="服务类型" prop="service_type">
-<!--                    <el-checkbox-group-->
-<!--                      v-model="postForm.service_type"-->
-<!--                      placeholder="服务类型"-->
-<!--                    >-->
-<!--                      <el-checkbox-button label="multiple" key="multiple">multiple</el-checkbox-button>-->
-<!--                      <el-checkbox-button label="single" key="single">single</el-checkbox-button>-->
-<!--                    </el-checkbox-group>-->
                     <el-switch
-                      style="display: block"
                       v-model="postForm.service_type"
+                      style="display: block"
                       active-color="#13ce66"
                       inactive-color="#ff4949"
                       active-text="复合项目"
                       inactive-text="单一项目"
                       active-value="multiple"
                       inactive-value="single"
-                    >
-                    </el-switch>
+                    />
                   </el-form-item>
                 </el-col>
                 <el-col :span="10" style="margin-bottom: 40px;">
@@ -642,10 +650,12 @@ import {
   updateService,
   getServiceConfigList
 } from '@/api/service'
+import { getProjectList } from '@/api/project'
 import { checkSpecialKey, validateURL } from '@/utils/validate'
 import CodeEditor from '@/components/CodeEditor/index.vue'
 const defaultForm = {
   id: undefined,
+  project: '',
   service_name: '',
   service_ports_enable: false,
   service_ports: [],
@@ -684,16 +694,6 @@ export default {
         callback()
       }
     }
-    // const validatePort = (rule, value, callback) => {
-    //   if (this.postForm.service_ports_enable) {
-    //     console.log(this.postForm.service_ports.length)
-    //     if (this.postForm.service_ports === []) {
-    //       callback(new Error('端口必须填!'))
-    //     } else {
-    //       callback()
-    //     }
-    //   }
-    // }
     const validateGit = (rule, value, callback) => {
       if (!validateURL(value)) {
         callback(new Error('请不要填入特殊字符'))
@@ -706,6 +706,7 @@ export default {
       service_healthy_type: 'tcp',
       service_healthy_type2: 'tcp',
       service_build_bin: 'mvn-3.6.3-java-1.8.0_202',
+      projectList: [],
       postForm: Object.assign({}, defaultForm),
       loading: false,
       port_rules: [
@@ -719,6 +720,9 @@ export default {
         { validator: validateSpecialKey, message: '只可以输入数字和字母和中横杠', trigger: 'blur' }
       ],
       rules: {
+        project: [
+          { required: true, message: '该字段是必填项', trigger: 'blur' }
+        ],
         service_name: [
           { required: true, message: '该字段是必填项', trigger: 'blur' },
           { pattern: /^[^\u4e00-\u9fa5]+$/, message: '不允许输入中文', trigger: 'blur' },
@@ -765,6 +769,7 @@ export default {
       this.fetchData(id)
     }
     this.getConfigList()
+    this.getProject()
     // Why need to make a copy of this.$route here?
     // Because if you enter this page and quickly switch tag, may be in the execution of the setTagsViewTitle function, this.$route is no longer pointing to the current page
     // https://github.com/PanJiaChen/vue-element-admin/issues/1221
@@ -774,6 +779,11 @@ export default {
     getConfigList() {
       getServiceConfigList().then(response => {
         this.configList = response.data
+      })
+    },
+    getProject() {
+      getProjectList().then(response => {
+        this.projectList = response.data
       })
     },
     fetchData(id) {
@@ -788,11 +798,6 @@ export default {
         console.log(err)
       })
     },
-    // setTagsViewTitle() {
-    //   // const title = '编辑Kubernetes'
-    //   // const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.postForm.id}` })
-    //   // this.$store.dispatch('tagsView/updateVisitedView', route)
-    // },
     setPageTitle() {
       const title = '编辑Kubernetes'
       document.title = `${title} - ${this.postForm.id}`
@@ -870,105 +875,10 @@ export default {
       if (this.postForm.service_ports.length === 0) {
         this.postForm.service_ports_enable = false
       }
-    },
-    changeEnvEnable() {
-      if (this.postForm.service_environment_enable) {
-        this.addEnv()
-      } else {
-        this.postForm.service_environment = []
-      }
-    },
-    addEnv() {
-      this.postForm.service_environment.push({
-        key: '',
-        value: '',
-        type: 'Key'
-      })
-    },
-    removeEnv(item) {
-      const index = this.postForm.service_environment.indexOf(item)
-      if (index !== -1) {
-        this.postForm.service_environment.splice(index, 1)
-      }
-      if (this.postForm.service_environment.length === 0) {
-        this.postForm.service_environment_enable = false
-      }
     }
   }
 }
 </script>
-
-<!-- <style lang="scss" scoped>
-@import "~@/styles/mixin.scss";
-.createPost-container {
-  position: relative;
-  .btn-box{
-text-align:right;
-padding-right:10%;
-}
-  .createPost-main-container {
-    padding-left:10%;
-    padding-right:10%;
-
-    .postInfo-container {
-      position: relative;
-      @include clearfix;
-      margin-bottom: 10px;
-
-      .postInfo-container-item {
-        float: left;
-      }
-    }
-  }
-
-  .word-counter {
-    width: 80px;
-    position: absolute;
-    right: 10px;
-    top: 0px;
-  }
-}
-.article-textarea ::v-deep {
-  textarea {
-    padding-right: 40px;
-    resize: none;
-    border: none;
-    border-radius: 0px;
-    border-bottom: 1px solid #bfcbd9;
-  }
-}
-</style>
-
-<style>
-
-.CodeMirror {
-position: absolute;
-top: 80px;
-left: 2px;
-right: 5px;
-bottom: 0px;
-padding: 2px;
-height: 100%;
-overflow-y: auto;
-}
-
-</style>
-<style lang='scss' scoped>
-
-.code-mirror-div {
-position: absolute;
-top: 0px;
-left: 2px;
-right: 5px;
-bottom: 0px;
-padding: 2px;
-.tool-bar {
-  top: 20px;
-  margin: 20px 2px 0px 10px;
-
-}
-}
-</style> -->
 
 <style lang="scss" scoped>
 @import "~@/styles/mixin.scss";

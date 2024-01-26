@@ -42,9 +42,14 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Jira地址" width="auto" align="center">
+      <el-table-column label="Jenkins地址" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.jenkins_address }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" width="auto" align="center">
+        <template slot-scope="{ row }">
+          <el-tag :type=" row.status | filter_jenkins_status_tag ">{{ row.status | filter_jenkins_status }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="执行时间" width="auto" align="center">
@@ -110,6 +115,38 @@ export default {
       }
     }
   },
+filters: {
+  filter_jenkins_status(value) {
+    if (value === 0 ) {
+      return '未执行'
+    } else if (value === 1 ) {
+      return '执行中'
+    } else if (value === 2 ) {
+      return '执行完成'
+    } else if (value === 3 ) {
+      return '执行失败'
+    } else if (value === 4 ) {
+      return '取消'
+    } else if (value === 5 ) {
+      return '未知'
+    }
+  },
+  filter_jenkins_status_tag(value) {
+    if (value === 0 ) {
+      return ''
+    } else if (value === 1 ) {
+      return 'warning'
+    } else if (value === 2 ) {
+      return 'success'
+    } else if (value === 3 ) {
+      return 'danger'
+    } else if (value === 4 ) {
+      return 'info'
+    } else if (value === 5 ) {
+      return 'info'
+    }
+  }
+},
   created() {
     this.getList()
   },

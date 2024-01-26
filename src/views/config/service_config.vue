@@ -66,11 +66,6 @@
           <span>{{ row.service_name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="文件内容" width="auto" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.content }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="配置类型" width="auto" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.content_type }}</span>
