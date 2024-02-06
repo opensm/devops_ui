@@ -40,9 +40,6 @@
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
-      <el-form-item prop="ldap">
-        <el-switch v-model="loginForm.ldap" active-color="#13ce66" inactive-color="#ff4949" />
-      </el-form-item>
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
 
     </el-form>

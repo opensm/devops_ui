@@ -1,13 +1,45 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
+    <div class="filter-container" style="margin-left: 10px">
+      <el-select
+        v-model="listQuery.service"
+        placeholder="选择是否有效"
+        style="width: 200px"
+        class="filter-item"
+        @keyup.enter.native="handleFilter"
+      >
+        <el-option label="请选择服务" selected />
+        <el-option v-for="(svc, index) in service" :key="index" :value="svc.id" :label="svc.service_name" />
+      </el-select>
       <el-input
         v-model="listQuery.images"
-        placeholder="Title"
+        placeholder="搜索镜像"
         style="width: 200px"
         class="filter-item"
         @keyup.enter.native="handleFilter"
       />
+      <el-select
+        v-model="listQuery.status"
+        placeholder="选择是否有效"
+        style="width: 200px"
+        class="filter-item"
+        @keyup.enter.native="handleFilter"
+      >
+        <el-option label="请选择有效无效" selected />
+        <el-option label="有效" value="1" />
+        <el-option label="无效" value="0" />
+      </el-select>
+      <el-select
+        v-model="listQuery.publish"
+        placeholder="选择是否有效"
+        style="width: 200px"
+        class="filter-item"
+        @keyup.enter.native="handleFilter"
+      >
+        <el-option label="请选择是否发版" selected />
+        <el-option label="已发" value="1" />
+        <el-option label="未发" value="0" />
+      </el-select>
       <el-button
         v-waves
         style="margin-left: 10px"
@@ -37,6 +69,7 @@
       fit
       highlight-current-row
       style="width: 100%"
+      size="mini"
       @sort-change="sortChange"
     >
       <el-table-column
@@ -56,18 +89,18 @@
           <span>{{ row.images }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Jira版本" width="auto" align="center">
+      <el-table-column label="Jira版本" width="200%" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.jira_version }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="是否有效" width="auto" align="center">
+      <el-table-column label="是否有效" width="90%" align="center">
         <template slot-scope="{ row }">
           <span v-if="row.status">是</span>
           <span v-else>否</span>
         </template>
       </el-table-column>
-      <el-table-column label="是否部署" width="auto" align="center">
+      <el-table-column label="是否部署" width="90%" align="center">
         <template slot-scope="{ row }">
           <span v-if="row.publish">是</span>
           <span v-else>否</span>
@@ -113,12 +146,13 @@
         :model="temp"
         label-position="left"
         label-width="120px"
-        style="width: 400px; margin-left: 50px"
+        style="width: 600px; margin-left: 50px"
       >
         <el-form-item label="部署服务" prop="service">
           <el-input
             v-model="temp.service"
             class="filter-item"
+            size="mini"
             placeholder="部署服务"
           />
         </el-form-item>
@@ -163,6 +197,7 @@ import {
   updateProduct,
   deleteProduct
 } from '@/api/config'
+import { getServiceList } from '@/api/service'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -177,13 +212,16 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      service: [],
       listQuery: {
         page: 1,
         limit: 20,
+        status: undefined,
+        publish: undefined,
         images: undefined,
-        sort: '+id'
+        service: undefined,
+        sort: '-id'
       },
-      showReviewer: false,
       temp: {
         id: undefined,
         images: '',
@@ -206,7 +244,8 @@ export default {
         ],
         status: [
           { required: true, message: '字段必填', trigger: 'blur' }
-        ], install_status: [
+        ],
+        install_status: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ]
       }
@@ -214,6 +253,7 @@ export default {
   },
   created() {
     this.getList()
+    this.getService()
   },
   methods: {
     getList() {
@@ -227,16 +267,19 @@ export default {
         }, 1.5 * 1000)
       })
     },
+    getService() {
+      getServiceList().then((response) => {
+        this.service = response.data
+        this.total = response.total
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
+      })
+    },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
-      row.status = status
     },
     sortChange(data) {
       const { prop, order } = data
@@ -255,10 +298,10 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        name: '',
         images: '',
-        install_status: false,
-        status: false
+        publish: false,
+        status: false,
+        service: ''
       }
     },
     handleCreate() {
@@ -288,7 +331,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

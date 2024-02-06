@@ -197,8 +197,8 @@ export default {
     this.getHelmRepoList()
   },
   methods: {
-    getHelmRepoList(){
-      getKubernetesHelmRepoList().then(response =>{
+    getHelmRepoList() {
+      getKubernetesHelmRepoList().then(response => {
         this.repoList = response.data
       })
     },

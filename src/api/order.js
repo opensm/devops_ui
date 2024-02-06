@@ -30,6 +30,13 @@ export function createOrder(data) {
     data
   })
 }
+export function updateOrder(id, data) {
+  return request({
+    url: `/order/order/${id}`,
+    method: 'put',
+    data
+  })
+}
 export function deleteOrder(id) {
   return request({
     url: `/order/order/${id}`,
@@ -37,9 +44,40 @@ export function deleteOrder(id) {
   })
 }
 
-export function updateOrder(id, data) {
+
+
+export function getOrderSubList(query) {
   return request({
-    url: `/order/order/${id}`,
+    url: '/order/ordersubs',
+    method: 'get',
+    params: query
+  })
+}
+
+export function getOrderSub(id) {
+  return request({
+    url: `/order/ordersub/${id}`,
+    method: 'get'
+  })
+}
+
+export function createOrderSub(data) {
+  return request({
+    url: '/order/ordersubs',
+    method: 'post',
+    data
+  })
+}
+export function deleteOrderSub(id) {
+  return request({
+    url: `/order/ordersub/${id}`,
+    method: 'delete'
+  })
+}
+
+export function updateOrderSub(id, data) {
+  return request({
+    url: `/order/ordersub/${id}`,
     method: 'put',
     data
   })

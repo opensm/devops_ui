@@ -377,11 +377,21 @@ export const asyncRoutes = [
     },
     children: [
       {
-        path: 'list',
-        name: 'order',
-        component: () => import('@/views/order/order'),
+        path: 'orders',
+        name: 'orders',
+        component: () => import('@/views/order/orders'),
         meta: {
           title: '我的工单',
+          icon: 'el-icon-user',
+          roles: ['admin', 'project-user']
+        }
+      },
+      {
+        path: 'order',
+        name: 'order',
+        component: () => import('@/views/order/order.vue'),
+        meta: {
+          title: '发布清单',
           icon: 'el-icon-user',
           roles: ['admin', 'project-user']
         }
@@ -462,7 +472,7 @@ export const asyncRoutes = [
           roles: ['admin', 'project-user']
         },
         hidden: true
-      },
+      }
     ]
   },
   {

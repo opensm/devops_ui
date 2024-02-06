@@ -82,7 +82,6 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status != 'published'"
             size="mini"
             type="success"
             @click="handleModifyStatus(row, 'published')"
@@ -90,7 +89,6 @@
             同步备份
           </el-button>
           <el-button
-            v-if="row.status != 'deleted'"
             size="mini"
             type="danger"
             @click="handleDelete(row, $index)"
@@ -113,9 +111,9 @@
         ref="dataForm"
         :rules="rules"
         :model="temp"
-        label-position="left"
-        label-width="120px"
-        style="width: 400px; margin-left: 50px"
+        label-position="center"
+        label-width="200px"
+        style="width: 600px; margin-left: 50px"
       >
         <el-form-item label="名称" prop="name">
           <el-input
@@ -124,11 +122,40 @@
             placeholder="名称"
           />
         </el-form-item>
-        <el-form-item label="仓库地址" prop="git_server">
+        <el-form-item label="配置保存地址(GitLab)" prop="git_server">
           <el-input
             v-model="temp.git_server"
             class="filter-item"
             placeholder="仓库地址"
+          />
+        </el-form-item>
+        <el-form-item label="配置保存地址Token" prop="git_token">
+          <el-input
+            v-model="temp.git_token"
+            type="password"
+            class="filter-item"
+            placeholder="配置保存地址Token"
+          />
+        </el-form-item>
+        <el-form-item label="harbor域名" prop="harbor_domain">
+          <el-input
+            v-model="temp.harbor_domain"
+            class="filter-item"
+            placeholder="harbor域名"
+          />
+        </el-form-item>
+        <el-form-item label="harbor用户名" prop="harbor_username">
+          <el-input
+            v-model="temp.harbor_username"
+            class="filter-item"
+            placeholder="harbor用户名"
+          />
+        </el-form-item>
+        <el-form-item label="harbor密码" prop="harbor_password">
+          <el-input
+            v-model="temp.harbor_password"
+            class="filter-item"
+            placeholder="harbor密码"
           />
         </el-form-item>
       </el-form>
@@ -142,22 +169,6 @@
         </el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">确认</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
@@ -169,6 +180,9 @@ import {
 } from '@/api/project'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
+import { mapGetters } from 'vuex'
+import { enSecret } from '@/utils/secret'
+import store from '@/store'
 export default {
   name: 'ComplexTable',
   components: {
@@ -181,24 +195,22 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
-      selectList: [],
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
         title: undefined,
         type: undefined,
         sort: '+id'
       },
-      sortOptions: [
-        { label: 'ID Ascending', key: '+id' },
-        { label: 'ID Descending', key: '-id' }
-      ],
       showReviewer: false,
       temp: {
         id: undefined,
         name: '',
-        git_server: ''
+        git_server: '',
+        git_token: '',
+        harbor_domain: '',
+        harbor_username: '',
+        harbor_password: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -206,18 +218,32 @@ export default {
         update: '修改',
         create: '新增'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         name: [
-          { required: true, message: 'name is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
         ],
         git_server: [
-          { required: true, message: 'git_server is required', trigger: 'blur' }
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        git_token: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        harbor_domain: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        harbor_username: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        harbor_password: [
+          { required: true, message: '字段必填', trigger: 'blur' }
         ]
-      },
-      downloadLoading: false
+      }
     }
+  },
+  computed: {
+    ...mapGetters([
+      'publickey'
+    ])
   },
   created() {
     this.getList()
@@ -263,7 +289,11 @@ export default {
       this.temp = {
         id: undefined,
         name: '',
-        git_server: ''
+        git_server: '',
+        git_token: '',
+        harbor_domain: '',
+        harbor_username: '',
+        harbor_password: ''
       }
     },
     handleCreate() {
@@ -277,6 +307,8 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
+          this.temp.git_token = enSecret(this.temp.git_token, store.getters.publickey)
+          this.temp.harbor_password = enSecret(this.temp.harbor_password, store.getters.publickey)
           createProject(this.temp).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
@@ -304,6 +336,8 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
+          tempData.git_token = enSecret(tempData.git_token, store.getters.publickey)
+          tempData.harbor_password = enSecret(tempData.harbor_password, store.getters.publickey)
           updateProject(tempData.id, tempData).then(response => {
             this.dialogFormVisible = false
             const { message, code } = response
