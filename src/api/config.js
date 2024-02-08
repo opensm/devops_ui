@@ -157,6 +157,13 @@ export function getProductList(query) {
     params: query
   })
 }
+export function getContents(query) {
+  return request({
+    url: '/config/contents',
+    method: 'get',
+    params: query
+  })
+}
 export function getProduct(id) {
   return request({
     url: `/config/product/${id}`,

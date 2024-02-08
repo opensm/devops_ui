@@ -84,82 +84,143 @@
     <el-dialog
       :title="textMap[dialogStatus]"
       :visible.sync="dialogFormVisible"
+      width="60%"
       @close="closeDialog()"
       @open="openDialog()"
     >
 
       <el-steps :active="active" finish-status="success">
-        <el-step title="关联项目环境"></el-step>
-        <el-step title="操作列表"></el-step>
-        <el-step title="确认信息"></el-step>
+        <el-step title="关联项目环境" />
+        <el-step title="操作列表" />
+        <el-step title="确认信息" />
       </el-steps>
-      <el-form v-show="active === 0"
+      <el-form
         ref="dataForm"
         :rules="rules"
         :model="temp"
-        width="50%"
+        width="95%"
         label-position="top"
-        label-width="120px"
-        style="width: 600px; margin-left: 100px;margin-bottom: 15%"
-        center>
-        <el-form-item label="所属项目" prop="project">
-          <el-select v-model="temp.project" placeholder="环境">
-            <el-option
-              v-for="(pro, index) in projectList"
-              :key="index"
-              :value="pro.id"
-              :label="pro.name"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="环境" prop="environment">
-          <el-select v-model="temp.environment" placeholder="环境">
-            <el-option
-              v-for="(repo, index) in EnvironmentList"
-              :key="index"
-              :value="repo.id"
-              :label="repo.environment"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="变更说明" prop="desc">
-          <el-input
-            v-model="temp.desc"
-            type="textarea"
-            class="filter-item"
-            placeholder="变更说明"
-          />
-        </el-form-item>
-      </el-form>
-      <el-form
-        v-show="active === 1"
-        :model="temp"
-        ref="dynamicValidateForm"
-        label-width="100px"
-        class="demo-dynamic"
-        style="margin-bottom: 15%"
+        style="width: 95%; margin-left: 20px;margin-right: 20px;margin-bottom: 15%"
+        center
       >
-        <el-form-item
-          v-for="(suborder, index) in temp.suborders"
-          :label="'子任务' + index"
-          :key="suborder.index"
-          :prop="'suborders.' + index + '.content_type'"
-          :rules="{ required: true, message: '发布类型', trigger: 'blur'}"
-        >
-          <el-select
-            v-model="suborder.content_type"
+        <div v-show="active === 0">
+          <el-form-item label="所属项目" prop="project">
+            <el-select v-model="temp.project" placeholder="环境">
+              <el-option
+                v-for="(pro, index) in projectList"
+                :key="index"
+                :value="pro.id"
+                :label="pro.name"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="环境" prop="environment">
+            <el-select v-model="temp.environment" placeholder="环境">
+              <el-option
+                v-for="(data, index) in EnvironmentList"
+                :key="index"
+                :value="data.value"
+                :label="data.label"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="变更说明" prop="desc">
+            <el-input
+              v-model="temp.desc"
+              type="textarea"
+              class="filter-item"
+              placeholder="变更说明"
+            />
+          </el-form-item>
+        </div>
+        <el-row v-show="active === 1" class="suborder">
+          <div
+            v-for="(suborder,index) in temp.suborders"
+            :key="'suborders'+index"
           >
-            <el-option
-              v-for="(data,index) in contentSelect"
-              :key="index"
-              :label="data.label"
-              :value="data.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="addSubOrder">新增操作列表</el-button>
-        </el-form-item>
+            <el-divider />
+            <el-row type="flex" align="middle">
+              <el-col :span="22">
+                <el-row>
+                  <el-col :span="6" style="margin-right: 20px">
+                    <el-form-item
+                      :key="suborder.index"
+                      :label="'任务类型' + index"
+                      :prop="'suborders.' + index + '.content_type'"
+                      :rules="{ required: true, message: '发布类型', trigger: 'blur'}"
+                    >
+                      <el-select v-model="suborder.content_type">
+                        <el-option
+                          v-for="(data,index) in contentList.content"
+                          :key="index"
+                          :label="data.label"
+                          :value="data.value"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="16" style="margin-right: 20px">
+                    <el-form-item
+                      :label="'关联配置' + index"
+                      :key="suborder.index"
+                      :prop="'suborders.' + index + '.object_id'"
+                      :rules="{ required: true, message: '发布类型', trigger: 'blur'}"
+                    >
+                      <el-select v-model="suborder.object_id">
+                        <el-option
+                          v-for="(data,index) in contentList.objects[temp.suborders[index].content_type]"
+                          :key="index"
+                          :label="data.label"
+                          :value="data.value"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="6" style="margin-right: 20px">
+                    <el-form-item
+                      :label="'名称：'"
+                      :prop="'suborders.' + index + '.correlation_name'"
+                      :rules="[{required: true, message: '字段不能为空', trigger: 'blur'}]"
+                    >
+                      <el-input v-model="temp.suborders[index]['correlation_name']" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="16" style="margin-right: 20px">
+                    <el-form-item
+                      :label="'关联配置' + index"
+                      :key="suborder.index"
+                      :prop="'suborders.' + index + '.object_id'"
+                      :rules="{ required: true, message: '发布类型', trigger: 'blur'}"
+                    >
+                      <el-select v-model="suborder.object_id">
+                        <el-option
+                          v-for="(data,index) in contentList.objects[temp.suborders[index].content_type]"
+                          :key="index"
+                          :label="data.label"
+                          :value="data.value"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-col>
+              <el-col :span="2">
+                <el-form-item
+                  :key="index+'s'"
+                  :label="` \u00a0`"
+                >
+                  <el-button style="margin-bottom: 0;" type="danger" @click.prevent="removeSuborder(suborder)">删除
+                  </el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+          <el-form-item>
+            <el-button type="success" @click="addSubOrder">新增操作列表</el-button>
+          </el-form-item>
+        </el-row>
       </el-form>
       <el-descriptions v-show="active === 2" title="任务信息">
       </el-descriptions>
@@ -174,7 +235,6 @@
           提交
         </el-button>
       </div>
-
     </el-dialog>
   </div>
 </template>
@@ -187,6 +247,7 @@ import {
 } from '@/api/order'
 import { getProjectList } from '@/api/project'
 import { getEnvironmentList } from '@/api/environment'
+import { getContents } from '@/api/config'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
 export default {
@@ -204,7 +265,7 @@ export default {
       active: 0,
       projectList: [],
       EnvironmentList: [],
-      contentSelect: [],
+      contentList: [],
       listQuery: {
         page: 1,
         limit: 20,
@@ -212,8 +273,8 @@ export default {
       },
       temp: {
         id: undefined,
-        project: '',
-        environment: '',
+        project: undefined,
+        environment: undefined,
         desc: '',
         suborders: []
       },
@@ -239,16 +300,49 @@ export default {
       }
     }
   },
+  // computed:{
+  //   contentList(){
+  //
+  //   }
+  // },
+  watch:{
+    'temp.environment':{
+      handler () {
+        this.EnvironmentList.forEach(item =>{
+          if (item.id == this.temp.environment){
+            this.contentList = item.children
+          }
+          this.temp.suborders = []
+        })
+      },
+    }
+  },
+
   created() {
     this.getList()
   },
   methods: {
-    addSubOrder(){
-      this.temp.suborders.push({})
+    addSubOrder() {
+      this.temp.suborders.push({
+        'images': undefined,
+        'content_type': undefined,
+        'object_id': undefined,
+        'content_object': undefined,
+        'go_over': undefined,
+        'params': undefined,
+        'correlation_name': undefined,
+        'is_backup': undefined
+      })
+    },
+    removeSuborder(item) {
+      const index = this.temp.suborders.indexOf(item)
+      if (index !== -1) {
+        this.temp.suborders.splice(index, 1)
+      }
     },
     next() {
-      if (this.active ++ > 3) this.active = 0;
-      this.getContentData()
+      if (this.active++ > 3) this.active = 0;
+      // this.getContentData()
     },
     prev() {
       if (this.active -- < 0)  this.active = 0
@@ -261,7 +355,7 @@ export default {
       const res = await getEnvironmentList()
       this.EnvironmentList = res.data
     },
-    openDialog(){
+    openDialog() {
       this.getProjects()
       this.getEnvironments()
     },
@@ -269,15 +363,17 @@ export default {
       this.resetTemp()
       this.active = 0
     },
+    // async getContentData(){
+    //   const res = await getContents()
+    //   this.contentList = res.data
+    // },
     getContentData(){
-      let envData = []
       this.EnvironmentList.forEach(item =>{
-        item.env_data.content.forEach(item2 =>{
-          envData.push(item2)
-        })
+        if (item.id == this.temp.environment){
+          this.contentList = item.children
+        }
+        console.log(this.contentList)
       })
-      this.contentSelect = envData
-      console.log(envData)
     },
     getList() {
       this.listLoading = true
@@ -394,6 +490,20 @@ export default {
 }
 </script>
 <style>
+.el-select {
+  width: 100%;
+}
+.suborder {
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding-left: 5%;
+  padding-top: 2%;
+  /*background-color: #409EFF;*/
+  background: linear-gradient(to bottom right, #ffba00, #e6ebf5);
+  color: #e6ebf5;
+  overflow: hidden;
+}
+
 .el-select {
   width: 100%;
 }

@@ -151,6 +151,13 @@
             placeholder="链接地址"
           />
         </el-form-item>
+        <el-form-item label="命名空间" prop="namespace">
+          <el-input
+            v-model="temp.namespace"
+            class="filter-item"
+            placeholder="命名空间"
+          />
+        </el-form-item>
         <el-form-item label="用户" prop="username">
           <el-input
             v-model="temp.username"
@@ -231,6 +238,9 @@ export default {
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
         protocol: [
+          { required: true, message: '字段必填', trigger: 'blur' }
+        ],
+        namespace: [
           { required: true, message: '字段必填', trigger: 'blur' }
         ],
         address: [
